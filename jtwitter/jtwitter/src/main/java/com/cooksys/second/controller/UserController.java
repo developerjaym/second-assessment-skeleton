@@ -1,5 +1,6 @@
 package com.cooksys.second.controller;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,10 +31,10 @@ public class UserController {
 	}
 	
 	@GetMapping()
-	public UserDto[] getUsers()
+	public List<UserDto> getUsers()
 	{
 		//return all non-deleted users as an array
-		return (UserDto[]) userService.getUsers().toArray();
+		return userService.getUsers();//.toArray();
 	}
 	
 	@PostMapping 
@@ -62,7 +63,7 @@ public class UserController {
 		//if user is deleted, send error
 		
 		//return a User
-		return null;
+		return userService.getUser(username);
 	}
 	@PatchMapping("@{username}")
 	public UserDto updateProfile(@PathVariable String username, @RequestBody NewUserDto newUserDto)
@@ -72,6 +73,9 @@ public class UserController {
 		//if no such user, if deleted user, or if credentials don't match, send error
 		
 		//if successful return user with updated data
+		
+		userService.updateUser(username, newUserDto);
+		
 		return null;
 	}
 	@DeleteMapping("@{username}")
@@ -83,6 +87,7 @@ public class UserController {
 		
 		//don't really drop any records from the database
 		
+		userService.deleteUser(username, credentialsDto);
 		
 		return null;
 	}
@@ -94,6 +99,8 @@ public class UserController {
 		//if relationship already exists, no such followable user exists, or credentials do not match anyone,
 			//send error
 		//if successful, no data is sent
+		
+		userService.followUser(username, credentialsDto);
 	}
 	@PostMapping("@{username}/unfollow")
 	public void unfollowUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto)
@@ -102,6 +109,8 @@ public class UserController {
 		//if no preexisting relationship, no such followable user exists, or credentials amtch no one,
 			//send error
 		//if successful, no data is sent
+		
+		userService.unfollowUser(username, credentialsDto);
 	}
 	@GetMapping("@{username}/tweets")
 	public TweetDto[] getTweets(@PathVariable String username)
@@ -131,11 +140,12 @@ public class UserController {
 			//send error
 		//if successful, return ['Tweet']
 		
+		
 		return null;
 		
 	}
 	@GetMapping("@{username}/followers")
-	public Set<UserDto> getFollowers(@PathVariable String username)
+	public List<UserDto> getFollowers(@PathVariable String username)
 	{
 		//retrieves the followers of hte user with the given username
 		//only active users should be included in the response
@@ -145,11 +155,13 @@ public class UserController {
 		
 		//if successful, return ['User']
 		
-		return null;
+		return userService.getFollowers(username);
+		
+		//return null;
 		
 	}
 	@GetMapping("@{username}/following")
-	public Set<UserDto> getFollowing(@PathVariable String username)
+	public List<UserDto> getFollowing(@PathVariable String username)
 	{
 		//retrieves the users followed by the user with the given username
 		//only active users should be included in response
@@ -158,7 +170,9 @@ public class UserController {
 			//send error
 		//if successful, return ['User']
 		
-		return null;
+		
+		return userService.getFollowing(username);
+		//return null;
 	}
 	
 

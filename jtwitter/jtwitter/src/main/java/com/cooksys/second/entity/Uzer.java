@@ -1,6 +1,7 @@
 package com.cooksys.second.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -32,13 +33,13 @@ public class Uzer {
 	@Embedded
 	private Credentials credentials;//not to be part of the Dao
 	
-	/*
+	
 	@ManyToMany
-	private Set<User> followers;
+	private List<Uzer> followers;
 	
 	@ManyToMany(mappedBy= "followers")
-	private Set<User> followedBy;//check this later
-	*/
+	private List<Uzer> followedBy;//check this later
+	
 	
 	
 	/**
@@ -111,33 +112,33 @@ public class Uzer {
 		this.credentials = credentials;
 	}
 
-//	/**
-//	 * @return the followers
-//	 */
-//	public Set<User> getFollowers() {
-//		return followers;
-//	}
-//
-//	/**
-//	 * @param followers the followers to set
-//	 */
-//	public void setFollowers(Set<User> followers) {
-//		this.followers = followers;
-//	}
-//
-//	/**
-//	 * @return the followedBy
-//	 */
-//	public Set<User> getFollowedBy() {
-//		return followedBy;
-//	}
-//
-//	/**
-//	 * @param followedBy the followedBy to set
-//	 */
-//	public void setFollowedBy(Set<User> followedBy) {
-//		this.followedBy = followedBy;
-//	}
+	/**
+	 * @return the followers
+	 */
+	public List<Uzer> getFollowers() {
+		return followers;
+	}
+
+	/**
+	 * @param followers the followers to set
+	 */
+	public void setFollowers(List<Uzer> followers) {
+		this.followers = followers;
+	}
+
+	/**
+	 * @return the followedBy
+	 */
+	public List<Uzer> getFollowedBy() {
+		return followedBy;
+	}
+
+	/**
+	 * @param followedBy the followedBy to set
+	 */
+	public void setFollowedBy(List<Uzer> followedBy) {
+		this.followedBy = followedBy;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()

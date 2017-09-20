@@ -1,5 +1,6 @@
 package com.cooksys.second.controller;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,14 +31,17 @@ public class TweetController {
 	}
 	
 	@GetMapping()
-	public TweetDto[] getTweets()
+	public List<TweetDto> getTweets()
 	{//consider a different return type
 		
 		//retrieves all non-deleted tweets
 		//the tweets should appear in reverse-chronological order
 		//response: ['tweet']
 		
-		return null;
+		
+		return tweetService.getTweets();
+		
+		//return null;
 	}
 	@PostMapping
 	public TweetDto createSimpleTweet(@RequestBody NewSimpleTweetDto newTweetDto)
