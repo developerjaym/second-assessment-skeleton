@@ -1,6 +1,7 @@
 package com.cooksys.second.entity;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,39 +15,30 @@ public class Tweet {
 	private Integer id;
 	
 	@Column(nullable = false)
-	private User author;
+	private Integer authorId;
+	//private User author;
 	
 	@Column(nullable = false)
 	private Timestamp posted;
 	
 	
 	@Column(nullable = false)
-	private /*final*/ String TYPE;//simple, repost, or reply
+	private /*final*/ String type;//simple, repost, or reply
 	
-	
+	/*
+	private Set<User> likedBy;
+	private Set<Hashtag> tags;
+	private Set<User> mentions;
+	*/
 	
 	@Column(nullable = true)
 	private String content;
 	@Column(nullable = true)
-	private Tweet inReplyTo;
+	private Integer inReplyToId;
+	//private Tweet inReplyTo;
 	@Column(nullable = true)
-	private Tweet repostOf;
+	private Integer repostOfId;
+	//private Tweet repostOf;
 	
 }
 
-enum TweetTypes
-{
-	SIMPLE("Simple"),
-	REPOST("Repost"),
-	REPLY("Reply");
-	private final String string;
-	private TweetTypes(String string)
-	{
-		this.string = string;
-	}
-	@Override
-	public String toString()
-	{
-		return string;
-	}
-}

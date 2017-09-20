@@ -33,7 +33,7 @@ public class UserController {
 	public UserDto[] getUsers()
 	{
 		//return all non-deleted users as an array
-		return userService.getUsers();
+		return (UserDto[]) userService.getUsers().toArray();
 	}
 	
 	@PostMapping 
@@ -49,7 +49,10 @@ public class UserController {
 		//send error
 		
 		//reactivate if credentials match previously-deleted user
-		return null;
+		
+		UserDto userDto = userService.createUser(newUserDto);
+		
+		return userDto;
 	}
 	
 	@GetMapping("@{username}")

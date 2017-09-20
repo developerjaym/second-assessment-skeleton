@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Context {
@@ -16,7 +17,9 @@ public class Context {
 	private Integer id;
 	
 	@Column(nullable = false)
-	private Tweet target;
+	private Integer tweetId;
+	/*@OneToOne
+	private Tweet target;*/
 	
 	
 	@OneToMany
