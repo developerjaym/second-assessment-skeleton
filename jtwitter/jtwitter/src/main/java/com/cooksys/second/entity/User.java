@@ -23,6 +23,9 @@ public class User {
 	@Column(nullable = false)
 	private Timestamp joined;
 	
+	@Column(nullable = false)
+	private boolean isActive;
+	
 	@Embedded
 	private Profile profile;
 	
