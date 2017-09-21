@@ -21,7 +21,7 @@ public class ValidationController {
 	public boolean isHashtagExistent(@PathVariable String label)
 	{
 		//returns true if the given hashtag exists
-		return false;
+		return validationService.isHashtagExistent(label);
 	}
 	
 	@GetMapping("username/exists/@{username}")
@@ -30,7 +30,7 @@ public class ValidationController {
 		//returns true if the username exists
 			//(the user is active)
 		
-		return false;
+		return validationService.isUsernameExistent(username);
 	}
 	
 	

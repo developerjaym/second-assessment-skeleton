@@ -53,6 +53,12 @@ public class UserService {
 		//return null;
 	}
 
+	public List<UserDto> getEvenDeletedUsers() {
+		// TODO Auto-generated method stub
+		return userMapper.toDtos(userRepository.getAllUsers());//.stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
+		//return null;
+	}
+	
 	public UserDto getUser(String username)
 	{
 		return userMapper.toDto(uzerJpaRepository.findByCredentialsUsername(username));

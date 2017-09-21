@@ -2,6 +2,7 @@ package com.cooksys.second.controller;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooksys.second.dto.HashtagDto;
 import com.cooksys.second.dto.TweetDto;
 import com.cooksys.second.service.TagService;
+import com.cooksys.second.service.TweetService;
+import com.cooksys.second.utility.Parser;
 
 @RestController
 @RequestMapping("tags")
@@ -18,7 +21,7 @@ public class TagController {
 
 	private TagService tagService;
 	
-	public TagController(TagService tagService)
+	public TagController(TweetService tweetService, TagService tagService)
 	{
 		this.tagService = tagService;
 	}
@@ -32,7 +35,7 @@ public class TagController {
 		return tagService.getAllTags();
 	}
 	@GetMapping("{label}")
-	public TweetDto[] getTweetsTaggedSo(@PathVariable String label)
+	public List<TweetDto> getTweetsTaggedSo(@PathVariable String label)
 	{
 		//retrieves all non-deleted tweets tagged with the given hashtag label
 		//the tweets should appear in reverse-chronological order
@@ -44,8 +47,7 @@ public class TagController {
 		//if no such hashtag exists
 			//send error
 		
-		
-		return null;
+		return tagService.getTweetsTaggedSo(label);
 	}
 	
 }
