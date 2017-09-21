@@ -2,13 +2,9 @@ package com.cooksys.second.service;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
-
 import com.cooksys.second.dto.CredentialsDto;
 import com.cooksys.second.dto.NewUserDto;
 import com.cooksys.second.dto.TweetDto;
@@ -37,8 +33,9 @@ public class UserService {
 	private ProfileMapper profileMapper;
 	
 	private TweetService tweetService;
+	private ValidationService validationService;
 	
-	public UserService(TweetService tweetService, UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
+	public UserService(ValidationService validationService, TweetService tweetService, UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
 	{
 		this.userRepository = userRepository;
 		this.userMapper = userMapper;
@@ -46,6 +43,7 @@ public class UserService {
 		this.credentialsMapper = credentialsMapper;
 		this.uzerJpaRepository = uzerJpaRepository;
 		this.tweetService = tweetService;
+		this.validationService = validationService;
 	}
 	
 	public List<UserDto> getUsers() {
@@ -59,67 +57,102 @@ public class UserService {
 	}
 	
 	public List<UserDto> getEvenDeletedUsers() {
-		// TODO Auto-generated method stub
 		return userMapper.toDtos(userRepository.getAllUsers());//.stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
 		//return null;
 	}
-	
+	public boolean userExistsAndIsActive(String username)
+	{
+		return getUsers().stream().filter(userDto->userDto.getUsername().equals(username)).collect(Collectors.toList()).size() == 1;
+	}
 	public UserDto getUser(String username)
 	{
+		if(!userExistsAndIsActive(username))
+			return null;
 		return userMapper.toDto(uzerJpaRepository.findByCredentialsUsername(username));
-		//return userMapper.toDto(userRepository.get(username));
 	}
 	
 	public UserDto createUser(NewUserDto newUserDto) {
 		
-		System.out.println("My new user dto is : " + newUserDto);
-		Uzer uzer = newUserMapper.toUser(newUserDto);
-		
-		/*Try to handle this in a no args constructor*/
-		uzer.setActive(true);
-		uzer.setJoined(TimeStamper.getTimestamp());
-		uzer.setCredentials(credentialsMapper.toCredentials(newUserDto.getCredentials()));
-		uzer.setFollowedBy(new ArrayList<Uzer>());
-		uzer.setFollowers(new ArrayList<Uzer>());
-		
-		uzer = userRepository.create(uzer);
-		
-		
-		UserDto userDto = userMapper.toDto(uzer);
-		userDto.setUsername(uzer.getCredentials().getUsername());//should be handled automatically
-		
-		return userDto;//userMapper.toDto(uzer);
+		if(tweetService.credentialsMatch(newUserDto.getCredentials()))
+		{
+			//reactivate
+			Uzer uzer = uzerJpaRepository.findByCredentialsUsername(newUserDto.getCredentials().getUsername());
+			uzer.setActive(true);
+			//reactive all tweets, too?
+			tweetService.reactivateTweetsBy(uzer);
+			//should I update the profile?
+			return userMapper.toDto(uzer);
+		}
+		else if(validationService.isUsernameAvailable(newUserDto.getCredentials().getUsername()))
+		{
+			//make new user
+			System.out.println("My new user dto is : " + newUserDto);
+			Uzer uzer = newUserMapper.toUser(newUserDto);
+			
+			/*Try to handle this better*/
+			uzer.setActive(true);
+			uzer.setJoined(TimeStamper.getTimestamp());
+			uzer.setCredentials(credentialsMapper.toCredentials(newUserDto.getCredentials()));
+			uzer.setFollowedBy(new ArrayList<Uzer>());
+			uzer.setFollowers(new ArrayList<Uzer>());
+			
+			uzer = userRepository.create(uzer);
+			
+			
+			UserDto userDto = userMapper.toDto(uzer);
+			userDto.setUsername(uzer.getCredentials().getUsername());//should be handled automatically
+			
+			return userDto;//userMapper.toDto(uzer);
+		}
+		else
+			return null;//name taken, I guess
 	}
 
 	public UserDto deleteUser(String username, CredentialsDto credentialsDto) {
-		//set this Uzer's isActive field to false
+		if(!tweetService.credentialsMatch(credentialsDto))
+			return null;
+		if(!this.userExistsAndIsActive(username))
+			return null;
 		
-		//make sure the password matches
 		return userMapper.toDto(userRepository.delete(uzerJpaRepository.findByCredentialsUsername(username)));
 	}
 
 	public UserDto updateUser(String username, NewUserDto newUserDto) {
-		//if successful return user with updated data
-		
-		//I think I need to go through each property of the new profile, if it's null, ignore it; if not, change the uzer
-		
+		if(!userExistsAndIsActive(username))
+			return null;
+		if(!tweetService.credentialsMatch(newUserDto.getCredentials()))
+			return null;
 		return userMapper.toDto(userRepository.updateUser(uzerJpaRepository.findByCredentialsUsername(username), profileMapper.toProfile(newUserDto.getProfile())));
 		
 	}
 
-	public void followUser(String username, CredentialsDto credentialsDto) {
-		// TODO Auto-generated method stub
-		//make the guy with these credentials follow the guy with this username
-		//make sure the password is right
-		userRepository.followUser(uzerJpaRepository.findByCredentialsUsername(username), uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()));
+	public boolean followUser(String username, CredentialsDto credentialsDto) {
 		
+		if(!userExistsAndIsActive(username))
+			return false;
+		if(!tweetService.credentialsMatch(credentialsDto))
+			return false;
+		Uzer userToBeFollowed = uzerJpaRepository.findByCredentialsUsername(username);
+		Uzer userWhoWillFollow = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
+		if(userToBeFollowed.getFollowedBy().contains(userWhoWillFollow))
+			return false;//can't follow again
+		
+		userRepository.followUser(userToBeFollowed, userWhoWillFollow);//uzerJpaRepository.findByCredentialsUsername(username), uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()));
+		return true;
 	}
 
-	public void unfollowUser(String username, CredentialsDto credentialsDto) {
-		//make the guy with these credentials unfollow the guy with this username
-				//make sure the password is right
-		userRepository.unfollowUser(uzerJpaRepository.findByCredentialsUsername(username), uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()));
-				
+	public boolean unfollowUser(String username, CredentialsDto credentialsDto) {
+		if(!userExistsAndIsActive(username))
+			return false;
+		if(!tweetService.credentialsMatch(credentialsDto))
+			return false;
+		Uzer userToBeUnFollowed = uzerJpaRepository.findByCredentialsUsername(username);
+		Uzer userWhoWillUnFollow = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
+		if(!userToBeUnFollowed.getFollowedBy().contains(userWhoWillUnFollow))
+			return false;//can't unfollow if not already following
+		
+		userRepository.unfollowUser(userToBeUnFollowed, userWhoWillUnFollow);
+		return true;
 	}
 
 	public List<UserDto> getFollowers(String username) {
@@ -129,7 +162,6 @@ public class UserService {
 	}
 
 	public List<UserDto> getFollowing(String username) {
-		// TODO Auto-generated method stub
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
 		return userMapper.toDtos(user.getFollowers());
 	}
@@ -168,7 +200,7 @@ public class UserService {
 		list.sort(null);
 		return list;
 	}
-
+	
 	public List<TweetDto> getMentions(String username) {
 		//retrieves all non-deleted tweets in which the user with the username is mentioned
 				//tweets should appear in reverse-chronological order

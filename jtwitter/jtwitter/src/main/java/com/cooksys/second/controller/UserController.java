@@ -3,6 +3,8 @@ package com.cooksys.second.controller;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,89 +33,63 @@ public class UserController {
 	}
 	
 	@GetMapping()
-	public List<UserDto> getUsers()
+	public List<UserDto> getUsers(HttpServletResponse response)
 	{
-		//return all non-deleted users as an array
-		return userService.getUsers();//.toArray();
+		return userService.getUsers();
 	}
 	
 	@PostMapping 
-	public  UserDto createUser(@RequestBody NewUserDto newUserDto)
+	public UserDto createUser(@RequestBody NewUserDto newUserDto, HttpServletResponse response)
 	{
-		//This method will be sent a Request like this:
-			//credentials
-			//profile
-		//I don't have any idea how this will work
-		
-		//if any required fields are missing
-		//if username is already taken
-		//send error
-		
-		//reactivate if credentials match previously-deleted user
-		
 		UserDto userDto = userService.createUser(newUserDto);
+		
+		if(userDto == null)
+			response.setStatus(406);//not acceptable
 		
 		return userDto;
 	}
 	
 	@GetMapping("@{username}")
-	public UserDto getUser(@PathVariable String username)
+	public UserDto getUser(@PathVariable String username, HttpServletResponse response)
 	{
-		//if no such user, send error
-		//if user is deleted, send error
-		
-		//return a User
-		return userService.getUser(username);
+		UserDto userDto = userService.getUser(username);
+		if(userDto == null)
+			response.setStatus(404);
+		return userDto;
 	}
 	@PatchMapping("@{username}")
-	public UserDto updateProfile(@PathVariable String username, @RequestBody NewUserDto newUserDto)
+	public UserDto updateProfile(@PathVariable String username, @RequestBody NewUserDto newUserDto, HttpServletResponse response)
 	{
-		//updates the profile with the given username
+		UserDto userDto = userService.updateUser(username, newUserDto);
+		if(userDto == null)
+			response.setStatus(404);
 		
-		//if no such user, if deleted user, or if credentials don't match, send error
-		
-		//if successful return user with updated data
-		
-		
-		
-		return userService.updateUser(username, newUserDto);
+		return userDto;
 	}
 	@DeleteMapping("@{username}")
-	public UserDto deleteUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto)
+	public UserDto deleteUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto, HttpServletResponse response)
 	{
-		//deactivates user with given username
-		//if no such user or credentials don't match, send error
-		//if successful, return user with the user data prior to deletion
+		UserDto userDto = userService.deleteUser(username, credentialsDto);
 		
-		//don't really drop any records from the database
+		if(userDto == null)
+			response.setStatus(406);
 		
-		
-		
-		return userService.deleteUser(username, credentialsDto);
+		return userDto;
 	}
 	@PostMapping("@{username}/follow")
-	public void followUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto)
+	public void followUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto, HttpServletResponse response)
 	{
-		//subscribes the user whose credentials are provided by the request body
-			//to the user whose username is given in the url
-		//if relationship already exists, no such followable user exists, or credentials do not match anyone,
-			//send error
-		//if successful, no data is sent
-		
-		userService.followUser(username, credentialsDto);
+		if(!userService.followUser(username, credentialsDto))
+			response.setStatus(406);
 	}
 	@PostMapping("@{username}/unfollow")
-	public void unfollowUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto)
+	public void unfollowUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto, HttpServletResponse response)
 	{
-		//unsubscribes the user whose credentials are given from the user whose usename is given
-		//if no preexisting relationship, no such followable user exists, or credentials amtch no one,
-			//send error
-		//if successful, no data is sent
-		
-		userService.unfollowUser(username, credentialsDto);
+		if(!userService.unfollowUser(username, credentialsDto))
+			response.setStatus(406);
 	}
 	@GetMapping("@{username}/feed")
-	public List<TweetDto> getFeed(@PathVariable String username)
+	public List<TweetDto> getFeed(@PathVariable String username, HttpServletResponse response)
 	{
 		//retrieves all (non-deleted) tweets authored by the user with the given username
 		//as well as all tweets authored by the users the given user is following
@@ -128,7 +104,7 @@ public class UserController {
 	}
 	
 	@GetMapping("@{username}/tweets")
-	public List<TweetDto> getTweets(@PathVariable String username)
+	public List<TweetDto> getTweets(@PathVariable String username, HttpServletResponse response)
 	{//consider using a different return type, consider a list, stack, or something like that
 		
 		//retrieves all (non-deleted) tweets authored by the user with the given username
@@ -143,7 +119,7 @@ public class UserController {
 		return userService.getTweetsBy(username);
 	}
 	@GetMapping("@{username}/mentions")
-	public List<TweetDto> getMentions(@PathVariable String username)
+	public List<TweetDto> getMentions(@PathVariable String username, HttpServletResponse response)
 	{//consider using a different return type, consider a list, stack, or something like that
 		
 		//retrieves all non-deleted tweets in which the user with the username is mentioned
@@ -160,7 +136,7 @@ public class UserController {
 		
 	}
 	@GetMapping("@{username}/followers")
-	public List<UserDto> getFollowers(@PathVariable String username)
+	public List<UserDto> getFollowers(@PathVariable String username, HttpServletResponse response)
 	{
 		//retrieves the followers of hte user with the given username
 		//only active users should be included in the response
@@ -176,7 +152,7 @@ public class UserController {
 		
 	}
 	@GetMapping("@{username}/following")
-	public List<UserDto> getFollowing(@PathVariable String username)
+	public List<UserDto> getFollowing(@PathVariable String username, HttpServletResponse response)
 	{
 		//retrieves the users followed by the user with the given username
 		//only active users should be included in response

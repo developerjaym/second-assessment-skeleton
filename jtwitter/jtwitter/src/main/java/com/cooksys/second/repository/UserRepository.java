@@ -51,8 +51,16 @@ public class UserRepository {
 
 	@Transactional
 	public Uzer updateUser(Uzer uzer, Profile profile) {
-		uzer.setProfile(profile);
-		entityManager.flush();
+		if(profile.getEmail() != null)
+			uzer.getProfile().setEmail(profile.getEmail());
+		if(profile.getFirstName() != null)
+			uzer.getProfile().setEmail(profile.getFirstName());
+		if(profile.getLastName() != null)
+			uzer.getProfile().setLastName(profile.getLastName());
+		if(profile.getPhone() != null)
+			uzer.getProfile().setPhone(profile.getPhone());
+		//uzer.setProfile(profile);
+		entityManager.flush();//so the returned uzer is updated properly. Does this work?
 		return uzer;
 	}
 

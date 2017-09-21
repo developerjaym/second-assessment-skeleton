@@ -113,6 +113,12 @@ public class TweetRepository {
 		
 	}
 
+	public void reactivateTweetsBy(Uzer author) {
+		List<Tweet> list = entityManager.createQuery("FROM Tweet", Tweet.class).getResultList().stream().filter(tweet->tweet.getAuthor().equals(author)).collect(Collectors.toList());
+		list.forEach(tweet->tweet.setActive(true));
+		
+	}
+
 	
 	
 }

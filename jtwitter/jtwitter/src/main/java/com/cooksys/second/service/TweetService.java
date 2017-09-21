@@ -2,6 +2,7 @@ package com.cooksys.second.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -233,6 +234,10 @@ public class TweetService {
 	public boolean credentialsMatch(CredentialsDto credentials) {
 		//go through all Uzers, if one with these credentials is active, return true
 		return userService.getUzers().stream().filter(uzer->uzer.getCredentials().getUsername()==credentials.getUsername() && uzer.getCredentials().getPassword()==credentials.getPassword()).collect(Collectors.toList()).size()==1;
+	}
+
+	public void reactivateTweetsBy(Uzer author) {
+		tweetRepository.reactivateTweetsBy(author);
 	}
 	
 	
