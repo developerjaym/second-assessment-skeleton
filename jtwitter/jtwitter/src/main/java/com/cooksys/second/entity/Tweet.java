@@ -1,6 +1,8 @@
 package com.cooksys.second.entity;
 
 import java.sql.Timestamp;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,6 +45,9 @@ public class Tweet {
 	@Column(nullable = true)
 	private Integer repostOfId;
 	//private Tweet repostOf;
+	
+	private Integer[] likedBy;
+	
 	public Integer getId() {
 		return id;
 	}
@@ -91,6 +96,12 @@ public class Tweet {
 	}
 	public void setRepostOfId(Integer repostOfId) {
 		this.repostOfId = repostOfId;
+	}
+	public Integer[] getLikedBy() {
+		return likedBy;
+	}
+	public void setLikedBy(Integer[] likedBy) {
+		this.likedBy = likedBy;
 	}
 	
 }

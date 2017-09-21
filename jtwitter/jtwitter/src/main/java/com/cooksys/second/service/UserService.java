@@ -1,5 +1,6 @@
 package com.cooksys.second.service;
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,14 +35,16 @@ public class UserService {
 	//other repositories
 	private ProfileMapper profileMapper;
 	
+	private TweetService tweetService;
 	
-	public UserService(UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
+	public UserService(TweetService tweetService, UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
 	{
 		this.userRepository = userRepository;
 		this.userMapper = userMapper;
 		this.newUserMapper = newUserMapper;
 		this.credentialsMapper = credentialsMapper;
 		this.uzerJpaRepository = uzerJpaRepository;
+		this.tweetService = tweetService;
 	}
 	
 	public List<UserDto> getUsers() {
@@ -130,7 +133,12 @@ public class UserService {
 		
 		//use the tweetservice to do this
 			//findTweetsWithSomeAuthor
-		return null;
+		
+		//look through all tweets, find ones authored by this guy or the guys followed by this guy
+		return tweetService.getTweets().stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
+		
+		
+		//return null;
 	}
 
 }

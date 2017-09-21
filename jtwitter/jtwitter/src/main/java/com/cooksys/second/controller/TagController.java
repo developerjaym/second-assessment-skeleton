@@ -1,5 +1,6 @@
 package com.cooksys.second.controller;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +23,13 @@ public class TagController {
 		this.tagService = tagService;
 	}
 	@GetMapping()
-	public Set<HashtagDto> getTags()
+	public List<HashtagDto> getTags()
 	{
 		//retrieves all Hashtags tracked by the database
 		
 		//returns ['Hashtag']
-		return null;
+		//return null;
+		return tagService.getAllTags();
 	}
 	@GetMapping("{label}")
 	public TweetDto[] getTweetsTaggedSo(@PathVariable String label)

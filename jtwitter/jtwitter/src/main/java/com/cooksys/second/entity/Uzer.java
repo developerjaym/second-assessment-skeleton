@@ -1,6 +1,7 @@
 package com.cooksys.second.entity;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +11,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+
+import com.cooksys.second.utility.TimeStamper;
 
 @Entity
 public class Uzer {
@@ -41,6 +44,14 @@ public class Uzer {
 	private List<Uzer> followedBy;//check this later
 	
 	
+	
+	public Uzer()
+	{
+		joined = TimeStamper.getTimestamp();
+		followers = new ArrayList<Uzer>();
+		followedBy = new ArrayList<Uzer>();
+		isActive = true;
+	}
 	
 	/**
 	 * @return the id

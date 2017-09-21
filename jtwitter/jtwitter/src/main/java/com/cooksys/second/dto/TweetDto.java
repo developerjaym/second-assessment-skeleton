@@ -9,7 +9,7 @@ public class TweetDto {
 
 	private Integer id;
 	
-	private Uzer author;
+	private UserDto author;
 	
 	private Timestamp posted;
 	
@@ -27,11 +27,11 @@ public class TweetDto {
 		this.id = id;
 	}
 
-	public Uzer getAuthor() {
+	public UserDto getAuthor() {
 		return author;
 	}
 
-	public void setAuthor(Uzer author) {
+	public void setAuthor(UserDto author) {
 		this.author = author;
 	}
 

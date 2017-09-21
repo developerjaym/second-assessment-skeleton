@@ -37,5 +37,10 @@ public class TweetRepository {
 		entityManager.persist(tweet);
 		return tweet;
 	}
+
+	@Transactional
+	public void deleteTweet(Tweet tweet) {
+		tweet.setActive(false);
+	}
 	
 }

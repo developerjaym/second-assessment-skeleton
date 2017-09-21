@@ -86,7 +86,9 @@ public class TweetController {
 		//IMPORTANT: don't drop these tweets from the database
 			//replies and reposts and those relationships should remain intact
 		
-		return null;
+		return tweetService.deleteTweet(id, credentialsDto);
+		
+		//return null;
 	}
 	@PostMapping("{id}/like")
 	public void likeTweet(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto)
@@ -97,6 +99,8 @@ public class TweetController {
 		//or if the given credentials don't match anyone
 			//send error
 		//if successful, no response body is sent
+		
+		tweetService.likeTweet(id, credentialsDto);
 	}
 	@PostMapping("{id}/reply")
 	public TweetDto createReply(@PathVariable Integer id, @RequestBody NewSimpleTweetDto newTweetDto)
@@ -141,7 +145,7 @@ public class TweetController {
 		
 		//IMPORTANT: remember that tags and mentions must be parsed by the server
 		
-		return null;
+		return tweetService.getTags(id);
 	}
 	@GetMapping("{id}/likes")
 	public Set<UserDto> getLikes(@PathVariable Integer id)
