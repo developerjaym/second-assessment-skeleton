@@ -112,6 +112,21 @@ public class UserController {
 		
 		userService.unfollowUser(username, credentialsDto);
 	}
+	@GetMapping("@{username}/feed")
+	public List<TweetDto> getFeed(@PathVariable String username)
+	{
+		//retrieves all (non-deleted) tweets authored by the user with the given username
+		//as well as all tweets authored by the users the given user is following
+			//including simple tweets, reposts, and replies
+		//the tweets should appear in reverse-chronological order
+		
+		//if no active user with that name exists
+			//send an error
+		
+		return userService.getFeed(username);
+		
+	}
+	
 	@GetMapping("@{username}/tweets")
 	public TweetDto[] getTweets(@PathVariable String username)
 	{//consider using a different return type, consider a list, stack, or something like that

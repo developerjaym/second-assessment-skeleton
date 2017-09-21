@@ -14,9 +14,9 @@ public interface TweetMapper {
 
 	Tweet toTweet(TweetDto tweetDto);
 	
-	List<TweetDto> toDtos(List<Tweet> uzers);
+	List<TweetDto> toDtos(List<Tweet> tweetDtos);
 	
-	List<Tweet> toUsers(List<TweetDto> users);
+	List<Tweet> toUsers(List<TweetDto> tweets);
 
-	TweetDto toDto(Tweet uzer);
+	TweetDto toDto(Tweet tweet);
 }

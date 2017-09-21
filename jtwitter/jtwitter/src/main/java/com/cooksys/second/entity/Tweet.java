@@ -33,7 +33,7 @@ public class Tweet {
 	*/
 	
 	@Column(nullable = false)
-	private boolean isActive;
+	private Boolean active;
 	
 	@Column(nullable = true)
 	private String content;
@@ -50,11 +50,11 @@ public class Tweet {
 		this.id = id;
 	}
 	
-	public boolean isActive() {
-		return isActive;
+	public Boolean getActive() {
+		return active;
 	}
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
+	public void setActive(Boolean isActive) {
+		this.active = isActive;
 	}
 	public Uzer getAuthor() {
 		return author;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cooksys.second.dto.CredentialsDto;
 import com.cooksys.second.dto.NewUserDto;
+import com.cooksys.second.dto.TweetDto;
 import com.cooksys.second.dto.UserDto;
 import com.cooksys.second.entity.Uzer;
 import com.cooksys.second.mapper.CredentialsMapper;
@@ -114,6 +115,22 @@ public class UserService {
 		// TODO Auto-generated method stub
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
 		return userMapper.toDtos(user.getFollowers());
+	}
+
+	public List<TweetDto> getFeed(String username) {
+		
+		//retrieves all (non-deleted) tweets authored by the user with the given username
+				//as well as all tweets authored by the users the given user is following
+					//including simple tweets, reposts, and replies
+				//the tweets should appear in reverse-chronological order
+		/*ArrayList<TweetDto> list = new ArrayList<>();		
+		list.addAll(userRepository.getTweetsFrom(uzerJpaRepository.findByCredentialsUsername(username)));
+		
+		return list;*/
+		
+		//use the tweetservice to do this
+			//findTweetsWithSomeAuthor
+		return null;
 	}
 
 }

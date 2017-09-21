@@ -1,5 +1,6 @@
 package com.cooksys.second.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -7,6 +8,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
 
+import com.cooksys.second.dto.TweetDto;
 import com.cooksys.second.entity.Credentials;
 import com.cooksys.second.entity.Profile;
 import com.cooksys.second.entity.Uzer;

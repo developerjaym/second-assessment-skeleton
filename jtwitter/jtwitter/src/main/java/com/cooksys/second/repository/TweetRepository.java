@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
 
@@ -23,9 +24,18 @@ public class TweetRepository {
 
 	public List<Tweet> getTweets() {
 		
-		return entityManager.createQuery("FROM Tweet", Tweet.class).getResultList().stream().filter(tweet->tweet.isActive()).collect(Collectors.toList());
+		return entityManager.createQuery("FROM Tweet", Tweet.class).getResultList().stream().filter(tweet->tweet.getActive()).collect(Collectors.toList());
 		
 		
+	}
+
+	@Transactional
+	public Tweet createTweet(Tweet tweet) {
+		
+		//maybe start a context, too
+		
+		entityManager.persist(tweet);
+		return tweet;
 	}
 	
 }

@@ -15,6 +15,7 @@ import com.cooksys.second.dto.ContextDto;
 import com.cooksys.second.dto.CredentialsDto;
 import com.cooksys.second.dto.HashtagDto;
 import com.cooksys.second.dto.NewSimpleTweetDto;
+import com.cooksys.second.dto.PostTweetDto;
 import com.cooksys.second.dto.TweetDto;
 import com.cooksys.second.dto.UserDto;
 import com.cooksys.second.service.TweetService;
@@ -44,7 +45,7 @@ public class TweetController {
 		//return null;
 	}
 	@PostMapping
-	public TweetDto createSimpleTweet(@RequestBody NewSimpleTweetDto newTweetDto)
+	public TweetDto createSimpleTweet(@RequestBody PostTweetDto postTweetDto)
 	{
 		//creates a new SIMPLE tweet
 		//sets author to the user identified by the credentials in requestbody
@@ -54,6 +55,9 @@ public class TweetController {
 		
 		//response should contain newly-created tweet
 			//it must not have a 'inreplyto' or 'repost' properties
+		
+		tweetService.createSimpleTweet(postTweetDto);
+		
 		return null;
 	}
 	@GetMapping("{id}")
@@ -65,7 +69,8 @@ public class TweetController {
 			//send error
 		
 		//response 'Tweet'
-		return null;
+		
+		return tweetService.getTweet(id);
 	}
 	@DeleteMapping("{id}")
 	public TweetDto deleteTweet(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto)
