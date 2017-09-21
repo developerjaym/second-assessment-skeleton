@@ -78,10 +78,16 @@ public class TweetService {
 		
 		
 	}
-
-	public TweetDto getTweet(Integer id) {
-		// TODO Auto-generated method stub
-		return tweetMapper.toDto(tweetJpaRepository.findById(id));
+	public boolean isTweetActiveAndExisting(Integer id)
+	{//active and existing
+		return getTweets().stream().filter(tweetDto->tweetDto.getId().equals(id)).collect(Collectors.toList()).size() == 1;
+	}
+	public TweetDto getTweet(Integer id) 
+	{//if time, find more efficient way to do this (does findById return null if no such tweet exists?)
+		
+		if(isTweetActiveAndExisting(id))
+			return tweetMapper.toDto(tweetJpaRepository.findById(id));
+		return null;//inactive
 	}
 
 	public TweetDto deleteTweet(Integer id, CredentialsDto credentialsDto) {
@@ -90,6 +96,8 @@ public class TweetService {
 		
 		//Uzer user = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
 		
+		if(!isTweetActiveAndExisting(id) || !credentialsMatch(credentialsDto))
+			return null;
 		
 		Tweet tweet = tweetJpaRepository.findById(id);
 		tweetRepository.deleteTweet(tweet);
@@ -97,26 +105,21 @@ public class TweetService {
 		return tweetMapper.toDto(tweet);
 	}
 
-	public void likeTweet(Integer id, CredentialsDto credentialsDto) {
+	public boolean likeTweet(Integer id, CredentialsDto credentialsDto) {
+		if(!credentialsMatch(credentialsDto))
+			return false;
 		Tweet tweet = tweetJpaRepository.findById(id);
 		ArrayList<Integer> list = (ArrayList<Integer>) Arrays.asList(tweet.getLikedBy());
 		list.add(uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()).getId());
 		tweet.setLikedBy(list.toArray(tweet.getLikedBy()));
-		
+		return true;
 	}
 
-	public List<HashtagDto> getTags(Integer id) {
-		//retrieves the tags associated with the tweet with the given id
+	public List<HashtagDto> getTags(Integer id) 
+	{
+		if(!isTweetActiveAndExisting(id))
+			return null;
 		
-				//if that tweet is deleted or doesn't exist
-					//send error
-				//if successful, return ['Hashtag']
-				
-				//IMPORTANT: remember that tags and mentions must be parsed by the server
-		
-		//go through each tag in my database
-			//check the tweet's contents for each tag
-			//if we found it, add it to the List
 		Tweet tweet = tweetJpaRepository.findById(id);
 		String contents = tweet.getContent();
 		List<HashtagDto> tagList = new ArrayList<HashtagDto>();
@@ -131,6 +134,9 @@ public class TweetService {
 	}
 
 	public Set<UserDto> getLikes(Integer id) {
+		if(!isTweetActiveAndExisting(id))
+			return null;
+		
 		//go through each saved ID in the Tweet's likedBy array, find the corresponding uzer, set 'em up and return
 		Integer[] likerIds =  tweetJpaRepository.findById(id).getLikedBy();
 		Set<UserDto> likers = new HashSet<UserDto>();
@@ -142,15 +148,11 @@ public class TweetService {
 	}
 
 	public List<TweetDto> getReplies(Integer id) {
-		//retrieves the DIRECT replies to the tweet with the given id
-				//if that tweet is deleted or otherwise doesn't exit
-					//send an error
-				//deleted replies to the tweet should be excluded from the response
-				
-				//return ['Tweet']
 		
 		//go through each non-deleted tweet
 		//find ones that inReplyToId matches the given id
+		if(!isTweetActiveAndExisting(id))
+			return null;
 		
 		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getInReplyTo().getId().equals(id)).collect(Collectors.toList());
 		
@@ -158,27 +160,16 @@ public class TweetService {
 	}
 
 	public List<TweetDto> getReposts(Integer id) {
-		//retrieves the direct reposts of the tweet with the given id
-		
-				//if that tweet is deleted or doesn't exist
-					//send error
-				
-				//response: ['Tweet']
-		
+		if(!isTweetActiveAndExisting(id))
+			return null;
 		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getRepostOf().getId().equals(id)).collect(Collectors.toList());
 		
 		return list;
 	}
 
 	public List<UserDto> getMentions(Integer id) {
-		//retrieves the users mentioned in the tweet with the given id
-		
-				//if that tweet is deleted or otherwise doesn't exist
-					//send error
-				
-				//deleted users should be excluded from the response
-				
-				//IMPORTANT: remember that tags and mentions must be parsed by the server
+		if(!isTweetActiveAndExisting(id))
+			return null;
 				
 		TweetDto tweetDto = this.getTweet(id);
 		List<String> mentionedNames =  Parser.getNames(tweetDto.getContent());
@@ -187,13 +178,8 @@ public class TweetService {
 	}
 
 	public ContextDto getContext(Integer id) {
-		//retrieves the context of the tweet with the given id
-		
-				//if that tweet is deleted or doesn't exist
-					//send error
-				
-				//IMPORTANT: deleted tweets should not be included in the context
-					//but their replies should be included
+		if(!isTweetActiveAndExisting(id))
+			return null;
 		
 		Tweet tweet = tweetJpaRepository.findById(id);
 		ContextDto contextDto = contextMapper.toDto(tweet.getContext());
@@ -208,16 +194,12 @@ public class TweetService {
 	}
 
 	public TweetDto createRepost(Integer id, CredentialsDto credentialsDto) {
-		//creates a repost of the tweet with the given id
-				//the author of the repost should match the credentials provided in the body
-				
-				//if the given tweet is deleted or doesn't exist
-				//or if the credentials match no one
-					//send error
-				
-				//respond with the newly created tweet
 		
-		//Tweet originalTweet = tweetJpaRepository.findById(id);
+		if(!credentialsMatch(credentialsDto))
+			return null;
+		if(!isTweetActiveAndExisting(id))
+			return null;
+		
 		Tweet reposted = new Tweet();
 		Uzer reposter = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
 		reposted.setType(TweetTypes.REPOST.toString());
@@ -230,18 +212,12 @@ public class TweetService {
 		
 	}
 
-	public TweetDto createReply(Integer id, PostTweetDto newTweetDto) {
-		//if the given tweet is deleted or doesn't exist
-				//or if the given credentials match no one
-					//send error
-				
-				//this creates a reply tweet, content is not optional
-				//the server must create the inReplyTo property/relationship
-				
-				//the response should contain the newly created tweet
-				
-				//IMPORTANT: the server must process the tweet's contents for @{username} mentions
-				//and #{hashtag} tags
+	public TweetDto createReply(Integer id, PostTweetDto newTweetDto) 
+	{
+		if(!credentialsMatch(newTweetDto.getCredentials()))
+			return null;
+		if(!isTweetActiveAndExisting(id))
+			return null;
 		
 		Tweet reply = new Tweet();
 		Uzer replyer = uzerJpaRepository.findByCredentialsUsername(newTweetDto.getCredentials().getUsername());
@@ -252,6 +228,11 @@ public class TweetService {
 		reply.setAuthor(replyer);
 		reply.setPosted(TimeStamper.getTimestamp());
 		return tweetMapper.toDto(tweetRepository.createReply(reply, tweetJpaRepository.findById(id)));
+	}
+
+	public boolean credentialsMatch(CredentialsDto credentials) {
+		//go through all Uzers, if one with these credentials is active, return true
+		return userService.getUzers().stream().filter(uzer->uzer.getCredentials().getUsername()==credentials.getUsername() && uzer.getCredentials().getPassword()==credentials.getPassword()).collect(Collectors.toList()).size()==1;
 	}
 	
 	

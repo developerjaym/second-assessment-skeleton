@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooksys.second.dto.ContextDto;
 import com.cooksys.second.dto.CredentialsDto;
 import com.cooksys.second.dto.HashtagDto;
-import com.cooksys.second.dto.NewSimpleTweetDto;
 import com.cooksys.second.dto.PostTweetDto;
 import com.cooksys.second.dto.TweetDto;
 import com.cooksys.second.dto.UserDto;
@@ -36,181 +35,111 @@ public class TweetController {
 	@GetMapping()
 	public List<TweetDto> getTweets(HttpServletResponse response)
 	{
-		response.getStatus(200);
+		response.setStatus(200);
 		return tweetService.getTweets();
 	}
 	@PostMapping
-	public TweetDto createSimpleTweet(@RequestBody PostTweetDto postTweetDto)
+	public TweetDto createSimpleTweet(@RequestBody PostTweetDto postTweetDto, HttpServletResponse response)
 	{
-		//creates a new SIMPLE tweet
-		//sets author to the user identified by the credentials in requestbody
-		
-		//if the credentials do not match an active user
-			//send error
-		
-		//response should contain newly-created tweet
-			//it must not have a 'inreplyto' or 'repost' properties
-		
-		return tweetService.createSimpleTweet(postTweetDto);
+		if(tweetService.credentialsMatch(postTweetDto.getCredentials()))
+			return tweetService.createSimpleTweet(postTweetDto);
+		else
+			response.setStatus(401);//unauthorized
+		return null;
 	}
 	@GetMapping("{id}")
-	public TweetDto getTweet(@PathVariable Integer id)
+	public TweetDto getTweet(@PathVariable Integer id, HttpServletResponse response)
 	{
-		//retrieves a tweet with the given id
-		
-		//if no such tweet or the tweet is deleted
-			//send error
-		
-		//response 'Tweet'
-		
-		return tweetService.getTweet(id);
+		TweetDto tweet = tweetService.getTweet(id);
+		if(tweet == null)
+			response.setStatus(404);
+		return tweet;
 	}
 	@DeleteMapping("{id}")
-	public TweetDto deleteTweet(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto)
+	public TweetDto deleteTweet(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto, HttpServletResponse response)
 	{//can a delete have a requestbody?
-		//deletes the tweet with the given id
-		
-		//if no such tweet exists or the credentials do not match the author
-			//send error
-		
-		//if tweet is deleted,
-			//respond with the tweet data prior to deletion
-		
-		//IMPORTANT: don't drop these tweets from the database
-			//replies and reposts and those relationships should remain intact
-		
-		return tweetService.deleteTweet(id, credentialsDto);
-		
-		//return null;
+		TweetDto tweet = tweetService.deleteTweet(id, credentialsDto);
+		if(tweet == null)
+			response.setStatus(404);
+		return tweet;
 	}
 	@PostMapping("{id}/like")
-	public void likeTweet(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto)
+	public void likeTweet(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto, HttpServletResponse response)
 	{
-		//creates a like relationship between th given id and the user whose credentials are provided
-		
-		//if the tweet is deleted or doesn't exist
-		//or if the given credentials don't match anyone
-			//send error
-		//if successful, no response body is sent
-		
-		tweetService.likeTweet(id, credentialsDto);
+		if(!tweetService.likeTweet(id, credentialsDto))
+			response.setStatus(404);
 	}
 	@PostMapping("{id}/reply")
-	public TweetDto createReply(@PathVariable Integer id, @RequestBody PostTweetDto newTweetDto)
+	public TweetDto createReply(@PathVariable Integer id, @RequestBody PostTweetDto newTweetDto, HttpServletResponse response)
 	{
-		//if the given tweet is deleted or doesn't exist
-		//or if the given credentials match no one
-			//send error
-		
-		//this creates a reply tweet, content is not optional
-		//the server must create the inReplyTo property/relationship
-		
-		//the response should contain the newly created tweet
-		
-		//IMPORTANT: the server must process the tweet's contents for @{username} mentions
-		//and #{hashtag} tags
-		
-		
-		
-		return tweetService.createReply(id, newTweetDto);
+		TweetDto tweet = tweetService.createReply(id, newTweetDto);
+		if(tweet == null)
+			response.setStatus(404);
+		return tweet;
 	}
 	@PostMapping("{id}/repost")
-	public TweetDto createRepost(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto)
+	public TweetDto createRepost(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto, HttpServletResponse response)
 	{
-		//creates a repost of the tweet with the given id
-		//the author of the repost should match the credentials provided in the body
-		
-		//if the given tweet is deleted or doesn't exist
-		//or if the credentials match no one
-			//send error
-		
-		//respond with the newly created tweet
-		
-		
-		return tweetService.createRepost(id, credentialsDto);
-		//return null;
+		TweetDto tweet = tweetService.createRepost(id, credentialsDto);
+		if(tweet == null)
+			response.setStatus(404);
+		return tweet;
 	}
 	@GetMapping("{id}/tags")
-	public List<HashtagDto> getTags(@PathVariable Integer id)
+	public List<HashtagDto> getTags(@PathVariable Integer id, HttpServletResponse response)
 	{
-		//retrieves the tags associated with the tweet with the given id
-		
-		//if that tweet is deleted or doesn't exist
-			//send error
-		//if successful, return ['Hashtag']
-		
-		//IMPORTANT: remember that tags and mentions must be parsed by the server
-		
-		return tweetService.getTags(id);
+		List<HashtagDto> list = tweetService.getTags(id);
+		if(list == null)
+			response.setStatus(404);
+		else if(list.isEmpty())
+			response.setStatus(404);
+		return list;
 	}
 	@GetMapping("{id}/likes")
-	public Set<UserDto> getLikes(@PathVariable Integer id)
+	public Set<UserDto> getLikes(@PathVariable Integer id, HttpServletResponse response)
 	{
-		//retrieves the active users who have liked this tweet with the given id
-		
-		//if that tweet is deleted or otherwise doesn't exist,
-			//send error
-		
-		//deleted users should be excluded from the response
-		
-		//return ['User']
-		
-		return tweetService.getLikes(id);
+		Set<UserDto> set = tweetService.getLikes(id);
+		if(set == null)
+			response.setStatus(404);
+		return set;
 	}
 	@GetMapping("{id}/context")	
-	public ContextDto getContext(@PathVariable Integer id)
+	public ContextDto getContext(@PathVariable Integer id, HttpServletResponse response)
 	{
-		//retrieves the context of the tweet with the given id
-		
-		//if that tweet is deleted or doesn't exist
-			//send error
-		
-		//IMPORTANT: deleted tweets should not be included in the context
-			//but their replies should be included
-		
-		return tweetService.getContext(id);
+		ContextDto contextDto = tweetService.getContext(id);
+		if(contextDto == null)
+			response.setStatus(404);
+		return contextDto;
 	}
 	@GetMapping("{id}/replies")
-	public List<TweetDto> getReplies(@PathVariable Integer id)
-	{//consider a different return type
-		
-		//retrieves the DIRECT replies to the tweet with the given id
-		//if that tweet is deleted or otherwise doesn't exit
-			//send an error
-		//deleted replies to the tweet should be excluded from the response
-		
-		//return ['Tweet']
-		
-		return tweetService.getReplies(id);
-		//return null;
+	public List<TweetDto> getReplies(@PathVariable Integer id, HttpServletResponse response)
+	{
+		List<TweetDto> list = tweetService.getReplies(id);
+		if(list == null)
+			response.setStatus(404);
+		else if(list.isEmpty())
+			response.setStatus(404);
+		return list;
 	}
 	@GetMapping("{id}/reposts")
-	public List<TweetDto> getReposts(@PathVariable Integer id)
-	{//consider a different return type
-		//retrieves the direct reposts of the tweet with the given id
-		
-		//if that tweet is deleted or doesn't exist
-			//send error
-		
-		//response: ['Tweet']
-		
-		return tweetService.getReposts(id);
-		//return null;
+	public List<TweetDto> getReposts(@PathVariable Integer id, HttpServletResponse response)
+	{
+		List<TweetDto> list = tweetService.getReposts(id);
+		if(list == null)
+			response.setStatus(404);
+		else if(list.isEmpty())
+			response.setStatus(404);
+		return list;
 	}
 	@GetMapping("{id}/mentions")
-	public List<UserDto> getMentions(@PathVariable Integer id)
+	public List<UserDto> getMentions(@PathVariable Integer id, HttpServletResponse response)
 	{
-		//retrieves the users mentioned in the tweet with the given id
-		
-		//if that tweet is deleted or otherwise doesn't exist
-			//send error
-		
-		//deleted users should be excluded from the response
-		
-		//IMPORTANT: remember that tags and mentions must be parsed by the server
-		
-		return tweetService.getMentions(id);
-		//return null;
+		List<UserDto> list = tweetService.getMentions(id);
+		if(list == null)
+			response.setStatus(404);
+		else if(list.isEmpty())
+			response.setStatus(404);
+		return list;
 	}
 	
 }

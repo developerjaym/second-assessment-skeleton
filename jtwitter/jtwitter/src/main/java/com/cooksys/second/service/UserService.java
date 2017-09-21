@@ -49,11 +49,15 @@ public class UserService {
 	}
 	
 	public List<UserDto> getUsers() {
-		// TODO Auto-generated method stub
 		return userMapper.toDtos(userRepository.getAllUsers().stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
 		//return null;
 	}
 
+	public List<Uzer> getUzers()
+	{
+		return userRepository.getAllUsers().stream().filter(uzer->uzer.isActive()).collect(Collectors.toList());
+	}
+	
 	public List<UserDto> getEvenDeletedUsers() {
 		// TODO Auto-generated method stub
 		return userMapper.toDtos(userRepository.getAllUsers());//.stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
