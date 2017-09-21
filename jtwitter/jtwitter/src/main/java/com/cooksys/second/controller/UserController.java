@@ -91,79 +91,45 @@ public class UserController {
 	@GetMapping("@{username}/feed")
 	public List<TweetDto> getFeed(@PathVariable String username, HttpServletResponse response)
 	{
-		//retrieves all (non-deleted) tweets authored by the user with the given username
-		//as well as all tweets authored by the users the given user is following
-			//including simple tweets, reposts, and replies
-		//the tweets should appear in reverse-chronological order
-		
-		//if no active user with that name exists
-			//send an error
-		
-		return userService.getFeed(username);
-		
+		List<TweetDto> list = userService.getFeed(username);
+		if(list == null)
+			response.setStatus(404);
+		return list;
 	}
 	
 	@GetMapping("@{username}/tweets")
 	public List<TweetDto> getTweets(@PathVariable String username, HttpServletResponse response)
-	{//consider using a different return type, consider a list, stack, or something like that
-		
-		//retrieves all (non-deleted) tweets authored by the user with the given username
-		//this includes all three kinds of tweets
-		//tweets should appear in reverse-chronological order
-		
-		//if no active user with that username
-			//send error
-		//if successful
-			//repond with ['Tweet']
-		
-		return userService.getTweetsBy(username);
+	{
+		List<TweetDto> list = userService.getTweetsBy(username);
+		if(list == null)
+			response.setStatus(404);
+		return list;
 	}
 	@GetMapping("@{username}/mentions")
 	public List<TweetDto> getMentions(@PathVariable String username, HttpServletResponse response)
-	{//consider using a different return type, consider a list, stack, or something like that
-		
-		//retrieves all non-deleted tweets in which the user with the username is mentioned
-		//tweets should appear in reverse-chronological order
-		//@username in a tweet's content means the user is mentioned
-		//only tweets with content can mention someone
-		
-		//if no active user with that username exists,
-			//send error
-		//if successful, return ['Tweet']
-		
-		
-		return userService.getMentions(username);
+	{
+		List<TweetDto> list = userService.getMentions(username);
+		if(list == null)
+			response.setStatus(404);
+		return list;
 		
 	}
 	@GetMapping("@{username}/followers")
 	public List<UserDto> getFollowers(@PathVariable String username, HttpServletResponse response)
 	{
-		//retrieves the followers of hte user with the given username
-		//only active users should be included in the response
-		
-		//if no active user with the given username,
-			//send error
-		
-		//if successful, return ['User']
-		
-		return userService.getFollowers(username);
-		
-		//return null;
+		List<UserDto> list = userService.getFollowers(username);
+		if(list == null)
+			response.setStatus(404);
+		return list;
 		
 	}
 	@GetMapping("@{username}/following")
 	public List<UserDto> getFollowing(@PathVariable String username, HttpServletResponse response)
 	{
-		//retrieves the users followed by the user with the given username
-		//only active users should be included in response
-		
-		//if no user exists with that name, 
-			//send error
-		//if successful, return ['User']
-		
-		
-		return userService.getFollowing(username);
-		//return null;
+		List<UserDto> list = userService.getFollowing(username);
+		if(list == null)
+			response.setStatus(404);
+		return list;
 	}
 	
 

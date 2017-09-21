@@ -113,8 +113,9 @@ public class UserService {
 			return null;
 		if(!this.userExistsAndIsActive(username))
 			return null;
-		
-		return userMapper.toDto(userRepository.delete(uzerJpaRepository.findByCredentialsUsername(username)));
+		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
+		tweetService.getRealTweets().forEach(tweet->tweet.setActive(false));//deactivate all their tweets
+		return userMapper.toDto(userRepository.delete(user));
 	}
 
 	public UserDto updateUser(String username, NewUserDto newUserDto) {
@@ -156,56 +157,41 @@ public class UserService {
 	}
 
 	public List<UserDto> getFollowers(String username) {
-		//if successful, return ['User']
+		if(!this.userExistsAndIsActive(username))
+			return null;
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
 		return userMapper.toDtos(user.getFollowedBy());
 	}
 
 	public List<UserDto> getFollowing(String username) {
+		if(!this.userExistsAndIsActive(username))
+			return null;
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
 		return userMapper.toDtos(user.getFollowers());
 	}
 
 	public List<TweetDto> getFeed(String username) {
-		
-		//retrieves all (non-deleted) tweets authored by the user with the given username
-				//as well as all tweets authored by the users the given user is following
-					//including simple tweets, reposts, and replies
-				//the tweets should appear in reverse-chronological order
-		/*ArrayList<TweetDto> list = new ArrayList<>();		
-		list.addAll(userRepository.getTweetsFrom(uzerJpaRepository.findByCredentialsUsername(username)));
-		
-		return list;*/
-		
-		//use the tweetservice to do this
-			//findTweetsWithSomeAuthor
+		if(!this.userExistsAndIsActive(username))
+			return null;
 		
 		//look through all tweets, find ones authored by this guy or the guys followed by this guy
 		List<TweetDto> list =  tweetService.getTweets().stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
 		list.sort(null);
-		
 		return list;
-		
-		//return null;
 	}
 
-	public List<TweetDto> getTweetsBy(String username) {
-		
-		//retrieves all (non-deleted) tweets authored by the user with the given username
-				//this includes all three kinds of tweets
-				//tweets should appear in reverse-chronological order
-		
-		//don't forget to sort it
+	public List<TweetDto> getTweetsBy(String username) 
+	{
+		if(!this.userExistsAndIsActive(username))
+			return null;
 		List<TweetDto> list = tweetService.getTweets().stream().filter(tweetDto->tweetDto.getAuthor().getUsername().equals(username)).collect(Collectors.toList());
 		list.sort(null);
 		return list;
 	}
 	
 	public List<TweetDto> getMentions(String username) {
-		//retrieves all non-deleted tweets in which the user with the username is mentioned
-				//tweets should appear in reverse-chronological order
-				//@username in a tweet's content means the user is mentioned
-				//only tweets with content can mention someone
+		if(!this.userExistsAndIsActive(username))
+			return null;
 		
 		List<TweetDto> list = tweetService.getTweets().stream().filter(tweetDto->Parser.mentionsName(username, tweetDto.getContent())).collect(Collectors.toList());
 		list.sort(null);

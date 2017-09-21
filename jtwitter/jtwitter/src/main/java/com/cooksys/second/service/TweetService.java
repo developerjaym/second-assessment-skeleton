@@ -57,6 +57,12 @@ public class TweetService {
 		list.sort(null);
 		return list;
 	}
+	public List<Tweet> getRealTweets() {
+		List<Tweet> list = tweetRepository.getTweets();
+		list.sort(null);
+		return list;
+		
+	}
 	public TweetDto createSimpleTweet(PostTweetDto postTweetDto) {
 		//should return the newly-made Tweet
 		
@@ -239,6 +245,8 @@ public class TweetService {
 	public void reactivateTweetsBy(Uzer author) {
 		tweetRepository.reactivateTweetsBy(author);
 	}
+
+	
 	
 	
 	
