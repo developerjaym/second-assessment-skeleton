@@ -135,7 +135,7 @@ public class TweetController {
 		return null;
 	}
 	@GetMapping("{id}/tags")
-	public Set<HashtagDto> getTags(@PathVariable Integer id)
+	public List<HashtagDto> getTags(@PathVariable Integer id)
 	{
 		//retrieves the tags associated with the tweet with the given id
 		
@@ -159,7 +159,7 @@ public class TweetController {
 		
 		//return ['User']
 		
-		return null;
+		return tweetService.getLikes(id);
 	}
 	@GetMapping("{id}/context")	
 	public ContextDto getContext(@PathVariable Integer id)

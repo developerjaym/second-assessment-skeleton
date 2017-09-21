@@ -20,6 +20,7 @@ import com.cooksys.second.mapper.ProfileMapper;
 import com.cooksys.second.mapper.UserMapper;
 import com.cooksys.second.repository.UserRepository;
 import com.cooksys.second.repository.UzerJpaRepository;
+import com.cooksys.second.utility.Parser;
 import com.cooksys.second.utility.TimeStamper;
 
 
@@ -141,10 +142,35 @@ public class UserService {
 			//findTweetsWithSomeAuthor
 		
 		//look through all tweets, find ones authored by this guy or the guys followed by this guy
-		return tweetService.getTweets().stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
+		List<TweetDto> list =  tweetService.getTweets().stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
+		list.sort(null);
 		
+		return list;
 		
 		//return null;
+	}
+
+	public List<TweetDto> getTweetsBy(String username) {
+		
+		//retrieves all (non-deleted) tweets authored by the user with the given username
+				//this includes all three kinds of tweets
+				//tweets should appear in reverse-chronological order
+		
+		//don't forget to sort it
+		List<TweetDto> list = tweetService.getTweets().stream().filter(tweetDto->tweetDto.getAuthor().getUsername().equals(username)).collect(Collectors.toList());
+		list.sort(null);
+		return list;
+	}
+
+	public List<TweetDto> getMentions(String username) {
+		//retrieves all non-deleted tweets in which the user with the username is mentioned
+				//tweets should appear in reverse-chronological order
+				//@username in a tweet's content means the user is mentioned
+				//only tweets with content can mention someone
+		
+		List<TweetDto> list = tweetService.getTweets().stream().filter(tweetDto->Parser.mentionsName(username, tweetDto.getContent())).collect(Collectors.toList());
+		list.sort(null);
+		return list;
 	}
 
 }

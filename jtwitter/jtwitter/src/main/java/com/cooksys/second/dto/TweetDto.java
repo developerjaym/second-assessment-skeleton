@@ -5,7 +5,8 @@ import java.sql.Timestamp;
 import com.cooksys.second.entity.Tweet;
 import com.cooksys.second.entity.Uzer;
 
-public class TweetDto {
+public class TweetDto implements Comparable<TweetDto>
+{
 
 	private Integer id;
 	
@@ -65,6 +66,11 @@ public class TweetDto {
 
 	public void setRepostOf(Tweet repostOf) {
 		this.repostOf = repostOf;
+	}
+
+	@Override
+	public int compareTo(TweetDto o) {
+		return posted.compareTo(o.posted);//might be backwards
 	}
 	
 	

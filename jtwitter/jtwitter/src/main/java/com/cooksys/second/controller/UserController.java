@@ -128,7 +128,7 @@ public class UserController {
 	}
 	
 	@GetMapping("@{username}/tweets")
-	public TweetDto[] getTweets(@PathVariable String username)
+	public List<TweetDto> getTweets(@PathVariable String username)
 	{//consider using a different return type, consider a list, stack, or something like that
 		
 		//retrieves all (non-deleted) tweets authored by the user with the given username
@@ -140,10 +140,10 @@ public class UserController {
 		//if successful
 			//repond with ['Tweet']
 		
-		return null;
+		return userService.getTweetsBy(username);
 	}
 	@GetMapping("@{username}/mentions")
-	public TweetDto[] getMentions(@PathVariable String username)
+	public List<TweetDto> getMentions(@PathVariable String username)
 	{//consider using a different return type, consider a list, stack, or something like that
 		
 		//retrieves all non-deleted tweets in which the user with the username is mentioned
@@ -156,7 +156,7 @@ public class UserController {
 		//if successful, return ['Tweet']
 		
 		
-		return null;
+		return userService.getMentions(username);
 		
 	}
 	@GetMapping("@{username}/followers")

@@ -16,7 +16,7 @@ public interface TagMapper {
 	
 	List<HashtagDto> toDtos(List<Hashtag> hashtagDtos);
 	
-	List<Hashtag> toUsers(List<HashtagDto> hashtags);
+	List<Hashtag> toHashtags(List<HashtagDto> hashtags);
 
 	HashtagDto toDto(Hashtag hashtag);
 }

@@ -1,5 +1,10 @@
 package com.cooksys.second.utility;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.cooksys.second.entity.Hashtag;
+
 public class Parser {
 /**
  * This will be for parsing Tweet content for #hashtags and @usernames
@@ -63,5 +68,31 @@ public class Parser {
 		if(contents.contains(mention + "#"))
 			return true;
 		return false;	
+	}
+
+	/**
+	 * Somehow make a list of Hashtags found in the given content
+	 * 
+	 * TODO Test this
+	 * 
+	 * @param content
+	 * @return
+	 */
+	public static List<Hashtag> getHashtags(String content) {
+		ArrayList<Hashtag> list = new ArrayList<>();
+		while(content.contains("#"))
+		{
+			content = content + " ";//add whitespace for convenien
+			int firstTag = content.indexOf("#");
+			int spaceIndex = content.indexOf(" ", firstTag);
+			Hashtag tag = new Hashtag();
+			tag.setLabel(content.substring(firstTag, spaceIndex));
+			tag.setLastUsed(TimeStamper.getTimestamp());
+			//tag.setFirstUsed???
+			list.add(tag);
+			content = content.substring(spaceIndex);
+		}
+		return list;
+		
 	}
 }

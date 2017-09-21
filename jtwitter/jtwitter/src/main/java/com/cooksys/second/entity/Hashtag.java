@@ -2,6 +2,7 @@ package com.cooksys.second.entity;
 
 import java.sql.Timestamp;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
@@ -13,16 +14,13 @@ public class Hashtag {
 	@GeneratedValue
 	private Integer id;
 	
+	@Column(nullable = false, unique = true)
 	private String label;
 	
 	private Timestamp firstUsed;
 	
 	private Timestamp lastUsed;//this one will require more work
 
-	public Hashtag()
-	{
-		firstUsed = TimeStamper.getTimestamp();
-	}
 	
 	public Integer getId() {
 		return id;

@@ -27,4 +27,38 @@ public class Context {
 	
 	@OneToMany
 	private Set<Tweet> after;//check annotation
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Integer getTweetId() {
+		return tweetId;
+	}
+
+	public void setTweetId(Integer tweetId) {
+		this.tweetId = tweetId;
+	}
+
+	public Set<Tweet> getBefore() {
+		return before;
+	}
+
+	public void setBefore(Set<Tweet> before) {
+		this.before = before;
+	}
+
+	public Set<Tweet> getAfter() {
+		return after;
+	}
+
+	public void setAfter(Set<Tweet> after) {
+		this.after = after;
+	}
+	
+	
 }

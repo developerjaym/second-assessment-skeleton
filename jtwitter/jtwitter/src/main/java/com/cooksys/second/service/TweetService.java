@@ -2,6 +2,7 @@ package com.cooksys.second.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,12 +12,16 @@ import com.cooksys.second.dto.CredentialsDto;
 import com.cooksys.second.dto.HashtagDto;
 import com.cooksys.second.dto.PostTweetDto;
 import com.cooksys.second.dto.TweetDto;
+import com.cooksys.second.dto.UserDto;
+import com.cooksys.second.entity.Hashtag;
 import com.cooksys.second.entity.Tweet;
 import com.cooksys.second.entity.Uzer;
+import com.cooksys.second.mapper.TagMapper;
 import com.cooksys.second.mapper.TweetMapper;
 import com.cooksys.second.repository.TweetJpaRepository;
 import com.cooksys.second.repository.TweetRepository;
 import com.cooksys.second.repository.UzerJpaRepository;
+import com.cooksys.second.utility.Parser;
 import com.cooksys.second.utility.TimeStamper;
 import com.cooksys.second.utility.TweetTypes;
 
@@ -25,16 +30,20 @@ public class TweetService {
 
 	private TweetRepository tweetRepository;
 	private TweetMapper tweetMapper;
+	private TagMapper tagMapper;
 	private UzerJpaRepository uzerJpaRepository;
 	private TweetJpaRepository tweetJpaRepository;
+	private UserService userService;
 	
 	
-	public TweetService(TweetJpaRepository tweetJpaRepository, UzerJpaRepository uzerJpaRepository, TweetRepository tweetRepository, TweetMapper tweetMapper)
+	public TweetService(UserService userService, TagMapper tagMapper, TweetJpaRepository tweetJpaRepository, UzerJpaRepository uzerJpaRepository, TweetRepository tweetRepository, TweetMapper tweetMapper)
 	{
 		this.tweetRepository = tweetRepository;
 		this.tweetMapper = tweetMapper;
+		this.tagMapper = tagMapper;
 		this.uzerJpaRepository = uzerJpaRepository;
 		this.tweetJpaRepository = tweetJpaRepository;
+		this.userService = userService;
 	}
 	
 	public List<TweetDto> getTweets() {
@@ -42,8 +51,11 @@ public class TweetService {
 		
 		
 		//make sure the TweetDto only has the DTO version of each property
-		return tweetMapper.toDtos(tweetRepository.getTweets());
+		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets());
 		
+		list.sort(null);
+		
+		return list;
 		
 		//return null;
 	}
@@ -60,6 +72,10 @@ public class TweetService {
 		tweet.setContent(postTweetDto.getContent());
 		tweet.setPosted(TimeStamper.getTimestamp());
 		tweet.setType(TweetTypes.SIMPLE.toString());
+		
+		//I should parse it for hashtags and then make new hashtags
+		List<Hashtag> hashtags = Parser.getHashtags(postTweetDto.getContent());
+		tweetRepository.createHashtags(hashtags);
 		
 		return tweetMapper.toDto(tweetRepository.createTweet(tweet));
 		
@@ -92,7 +108,7 @@ public class TweetService {
 		
 	}
 
-	public Set<HashtagDto> getTags(Integer id) {
+	public List<HashtagDto> getTags(Integer id) {
 		//retrieves the tags associated with the tweet with the given id
 		
 				//if that tweet is deleted or doesn't exist
@@ -103,7 +119,29 @@ public class TweetService {
 		
 		//go through each tag in my database
 			//check the tweet's contents for each tag
-		return null;
+			//if we found it, add it to the List
+		Tweet tweet = tweetJpaRepository.findById(id);
+		String contents = tweet.getContent();
+		List<HashtagDto> tagList = new ArrayList<HashtagDto>();
+		tweetRepository.getAllHashtags().forEach((hashtag)->
+		{
+			if(Parser.containsTag(hashtag.getLabel(), contents))
+				tagList.add(tagMapper.toDto(hashtag));
+		});
+		
+		
+		return tagList;
+	}
+
+	public Set<UserDto> getLikes(Integer id) {
+		//go through each saved ID in the Tweet's likedBy array, find the corresponding uzer, set 'em up and return
+		Integer[] likerIds =  tweetJpaRepository.findById(id).getLikedBy();
+		Set<UserDto> likers = new HashSet<UserDto>();
+		for(Integer i : likerIds)
+		{
+			likers.add(uzerJpaRepository.findById(i));
+		}
+		return likers;
 	}
 	
 	
