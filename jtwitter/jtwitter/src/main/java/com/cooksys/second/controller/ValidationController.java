@@ -1,5 +1,7 @@
 package com.cooksys.second.controller;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,30 +20,25 @@ public class ValidationController {
 		this.validationService = validationService;
 	}
 	@GetMapping("tag/exists/{label}")
-	public boolean isHashtagExistent(@PathVariable String label)
+	public boolean isHashtagExistent(@PathVariable String label, HttpServletResponse response)
 	{
-		//returns true if the given hashtag exists
+		response.setStatus(200);
 		return validationService.isHashtagExistent(label);
 	}
 	
 	@GetMapping("username/exists/@{username}")
-	public boolean isUsernameExistent(@PathVariable String username)
+	public boolean isUsernameExistent(@PathVariable String username, HttpServletResponse response)
 	{
-		//returns true if the username exists
-			//(the user is active)
-		
+		response.setStatus(200);
 		return validationService.isUsernameExistent(username);
 	}
 	
 	
 	@GetMapping("username/available/@{username}")
-	public boolean isUsernameAvailable(@PathVariable String username)
+	public boolean isUsernameAvailable(@PathVariable String username, HttpServletResponse response)
 	{
-		//return true if the username is available
-			//no active or inactive user with that name
-			// a new user can choose this name
-		
-		return false;
+		response.setStatus(200);
+		return validationService.isUsernameAvailable(username);
 	}
 
 }

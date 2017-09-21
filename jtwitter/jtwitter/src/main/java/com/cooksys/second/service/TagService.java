@@ -39,7 +39,7 @@ public class TagService {
 	public List<TweetDto> getTweetsTaggedSo(String label) {
 		List<TweetDto> allActiveTweets = tweetService.getTweets();
 		List<TweetDto> allWithHashtag = allActiveTweets.stream().filter(tweetdto->Parser.containsTag(label, tweetdto.getContent())).collect(Collectors.toList());
-		//sort them, List<TweetDto> allSorted, reverse chronologically remember
+		allWithHashtag.sort(null);
 		return allWithHashtag;
 	}
 

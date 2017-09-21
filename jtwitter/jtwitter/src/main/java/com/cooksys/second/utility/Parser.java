@@ -3,6 +3,7 @@ package com.cooksys.second.utility;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cooksys.second.dto.UserDto;
 import com.cooksys.second.entity.Hashtag;
 
 public class Parser {
@@ -94,5 +95,19 @@ public class Parser {
 		}
 		return list;
 		
+	}
+
+	public static List<String> getNames(String content) {
+		ArrayList<String> list = new ArrayList<>();
+		while(content.contains("@"))
+		{
+			content = content + " ";//add whitespace for convenien
+			int firstTag = content.indexOf("@");
+			int spaceIndex = content.indexOf(" ", firstTag);
+			//tag.setFirstUsed???
+			list.add(content.substring(firstTag, spaceIndex));
+			content = content.substring(spaceIndex);
+		}
+		return list;
 	}
 }

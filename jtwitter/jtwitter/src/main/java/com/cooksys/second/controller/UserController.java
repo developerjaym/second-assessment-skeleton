@@ -74,9 +74,9 @@ public class UserController {
 		
 		//if successful return user with updated data
 		
-		userService.updateUser(username, newUserDto);
 		
-		return null;
+		
+		return userService.updateUser(username, newUserDto);
 	}
 	@DeleteMapping("@{username}")
 	public UserDto deleteUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto)
@@ -87,9 +87,9 @@ public class UserController {
 		
 		//don't really drop any records from the database
 		
-		userService.deleteUser(username, credentialsDto);
 		
-		return null;
+		
+		return userService.deleteUser(username, credentialsDto);
 	}
 	@PostMapping("@{username}/follow")
 	public void followUser(@PathVariable String username, @RequestBody CredentialsDto credentialsDto)

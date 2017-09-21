@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,26 +30,16 @@ public class TagController {
 	@GetMapping()
 	public List<HashtagDto> getTags()
 	{
-		//retrieves all Hashtags tracked by the database
-		
-		//returns ['Hashtag']
-		//return null;
 		return tagService.getAllTags();
 	}
 	@GetMapping("{label}")
-	public List<TweetDto> getTweetsTaggedSo(@PathVariable String label)
+	public List<TweetDto> getTweetsTaggedSo(@PathVariable String label, HttpServletResponse response)
 	{
-		//retrieves all non-deleted tweets tagged with the given hashtag label
-		//the tweets should appear in reverse-chronological order
-		
-		//a tweet is considered 'tagged' by the hashtag
-			//if the tweet has content
-			//and if the hashtag's label appears in that content following a #
-		
-		//if no such hashtag exists
-			//send error
-		
-		return tagService.getTweetsTaggedSo(label);
+		response.setStatus(200);
+		List<TweetDto> tweetsTaggedSo = tagService.getTweetsTaggedSo(label);
+		if(tweetsTaggedSo.isEmpty())
+			response.setStatus(204);//no content
+		return tweetsTaggedSo;
 	}
 	
 }

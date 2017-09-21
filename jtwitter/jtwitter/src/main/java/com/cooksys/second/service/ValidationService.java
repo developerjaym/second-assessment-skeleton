@@ -1,5 +1,7 @@
 package com.cooksys.second.service;
 
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,6 +28,16 @@ public class ValidationService {
 			return false;
 		else
 			return true;
+		
+	}
+
+	public boolean isUsernameAvailable(String username) {
+		//return true if the username is available
+		//no active or inactive user with that name
+		// a new user can choose this name
+		
+		return userService.getEvenDeletedUsers().stream().filter(userDto->userDto.getUsername().equals(username)).collect(Collectors.toList()).size()==0;
+		
 		
 	}
 

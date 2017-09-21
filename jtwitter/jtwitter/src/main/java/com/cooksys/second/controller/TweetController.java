@@ -3,6 +3,8 @@ package com.cooksys.second.controller;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,17 +34,10 @@ public class TweetController {
 	}
 	
 	@GetMapping()
-	public List<TweetDto> getTweets()
-	{//consider a different return type
-		
-		//retrieves all non-deleted tweets
-		//the tweets should appear in reverse-chronological order
-		//response: ['tweet']
-		
-		
+	public List<TweetDto> getTweets(HttpServletResponse response)
+	{
+		response.getStatus(200);
 		return tweetService.getTweets();
-		
-		//return null;
 	}
 	@PostMapping
 	public TweetDto createSimpleTweet(@RequestBody PostTweetDto postTweetDto)
@@ -56,9 +51,7 @@ public class TweetController {
 		//response should contain newly-created tweet
 			//it must not have a 'inreplyto' or 'repost' properties
 		
-		tweetService.createSimpleTweet(postTweetDto);
-		
-		return null;
+		return tweetService.createSimpleTweet(postTweetDto);
 	}
 	@GetMapping("{id}")
 	public TweetDto getTweet(@PathVariable Integer id)
@@ -103,7 +96,7 @@ public class TweetController {
 		tweetService.likeTweet(id, credentialsDto);
 	}
 	@PostMapping("{id}/reply")
-	public TweetDto createReply(@PathVariable Integer id, @RequestBody NewSimpleTweetDto newTweetDto)
+	public TweetDto createReply(@PathVariable Integer id, @RequestBody PostTweetDto newTweetDto)
 	{
 		//if the given tweet is deleted or doesn't exist
 		//or if the given credentials match no one
@@ -117,7 +110,9 @@ public class TweetController {
 		//IMPORTANT: the server must process the tweet's contents for @{username} mentions
 		//and #{hashtag} tags
 		
-		return null;
+		
+		
+		return tweetService.createReply(id, newTweetDto);
 	}
 	@PostMapping("{id}/repost")
 	public TweetDto createRepost(@PathVariable Integer id, @RequestBody CredentialsDto credentialsDto)
@@ -132,7 +127,8 @@ public class TweetController {
 		//respond with the newly created tweet
 		
 		
-		return null;
+		return tweetService.createRepost(id, credentialsDto);
+		//return null;
 	}
 	@GetMapping("{id}/tags")
 	public List<HashtagDto> getTags(@PathVariable Integer id)
@@ -172,10 +168,10 @@ public class TweetController {
 		//IMPORTANT: deleted tweets should not be included in the context
 			//but their replies should be included
 		
-		return null;
+		return tweetService.getContext(id);
 	}
 	@GetMapping("{id}/replies")
-	public TweetDto[] getReplies(@PathVariable Integer id)
+	public List<TweetDto> getReplies(@PathVariable Integer id)
 	{//consider a different return type
 		
 		//retrieves the DIRECT replies to the tweet with the given id
@@ -185,10 +181,11 @@ public class TweetController {
 		
 		//return ['Tweet']
 		
-		return null;
+		return tweetService.getReplies(id);
+		//return null;
 	}
 	@GetMapping("{id}/reposts")
-	public TweetDto[] getReposts(@PathVariable Integer id)
+	public List<TweetDto> getReposts(@PathVariable Integer id)
 	{//consider a different return type
 		//retrieves the direct reposts of the tweet with the given id
 		
@@ -197,10 +194,11 @@ public class TweetController {
 		
 		//response: ['Tweet']
 		
-		return null;
+		return tweetService.getReposts(id);
+		//return null;
 	}
 	@GetMapping("{id}/mentions")
-	public Set<UserDto> getMentions(@PathVariable Integer id)
+	public List<UserDto> getMentions(@PathVariable Integer id)
 	{
 		//retrieves the users mentioned in the tweet with the given id
 		
@@ -210,7 +208,9 @@ public class TweetController {
 		//deleted users should be excluded from the response
 		
 		//IMPORTANT: remember that tags and mentions must be parsed by the server
-		return null;
+		
+		return tweetService.getMentions(id);
+		//return null;
 	}
 	
 }

@@ -43,15 +43,17 @@ public class UserRepository {
 	}
 
 	@Transactional
-	public void delete(Uzer uzer) {
+	public Uzer delete(Uzer uzer) {
 		// TODO Auto-generated method stub
 		uzer.setActive(false);
+		return uzer;
 	}
 
 	@Transactional
-	public void updateUser(Uzer uzer, Profile profile) {
-		// TODO Auto-generated method stub
+	public Uzer updateUser(Uzer uzer, Profile profile) {
 		uzer.setProfile(profile);
+		entityManager.flush();
+		return uzer;
 	}
 
 	@Transactional

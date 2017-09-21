@@ -1,5 +1,6 @@
 package com.cooksys.second.repository;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,14 +44,42 @@ public class TweetRepository {
 		entityManager.flush();//so I get an id. Does this work?
 		
 		Context context = new Context();
-		context.setAfter(new HashSet<Tweet>());
-		context.setBefore(new HashSet<Tweet>());
-		context.setTweetId(tweet.getId());
+		context.setAfter(new ArrayList<Tweet>());
+		context.setBefore(new ArrayList<Tweet>());
+		context.setTarget(tweet);//.setTweetId(tweet.getId());
 		entityManager.persist(context);
 		
 		return tweet;
 	}
 
+	@Transactional
+	public Tweet createReply(Tweet reply, Tweet original) {
+		entityManager.persist(reply);
+		entityManager.flush();//so I get an id. Does this work?
+		
+		original.getContext().getAfter().add(reply);//add it to the original's context
+		
+		Context context = new Context();//make a new context //if you have free time, do this more intelligently
+		context.setAfter(new ArrayList<Tweet>());
+		context.setBefore(new ArrayList<Tweet>());
+		context.getBefore().add(original);
+		context.setTarget(reply);//.setTweetId(tweet.getId());
+		entityManager.persist(context);
+		
+		return reply;
+	}
+	
+	@Transactional
+	public Tweet createRepost(Tweet tweet) {
+		
+		entityManager.persist(tweet);
+		entityManager.flush();//so I get an id. Does this work?
+		
+		return tweet;
+	}
+	
+	
+	
 	@Transactional
 	public void deleteTweet(Tweet tweet) {
 		tweet.setActive(false);
@@ -83,5 +112,7 @@ public class TweetRepository {
 		});
 		
 	}
+
+	
 	
 }

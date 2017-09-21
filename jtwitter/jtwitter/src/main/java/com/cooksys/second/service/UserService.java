@@ -87,16 +87,19 @@ public class UserService {
 		return userDto;//userMapper.toDto(uzer);
 	}
 
-	public void deleteUser(String username, CredentialsDto credentialsDto) {
+	public UserDto deleteUser(String username, CredentialsDto credentialsDto) {
 		//set this Uzer's isActive field to false
 		
 		//make sure the password matches
-		userRepository.delete(uzerJpaRepository.findByCredentialsUsername(username));
+		return userMapper.toDto(userRepository.delete(uzerJpaRepository.findByCredentialsUsername(username)));
 	}
 
-	public void updateUser(String username, NewUserDto newUserDto) {
+	public UserDto updateUser(String username, NewUserDto newUserDto) {
 		//if successful return user with updated data
-		userRepository.updateUser(uzerJpaRepository.findByCredentialsUsername(username), profileMapper.toProfile(newUserDto.getProfile()));
+		
+		//I think I need to go through each property of the new profile, if it's null, ignore it; if not, change the uzer
+		
+		return userMapper.toDto(userRepository.updateUser(uzerJpaRepository.findByCredentialsUsername(username), profileMapper.toProfile(newUserDto.getProfile())));
 		
 	}
 

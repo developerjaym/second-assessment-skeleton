@@ -48,6 +48,8 @@ public class Tweet {
 	
 	private Integer[] likedBy;
 	
+	private Context context;
+	
 	public Integer getId() {
 		return id;
 	}
@@ -102,6 +104,12 @@ public class Tweet {
 	}
 	public void setLikedBy(Integer[] likedBy) {
 		this.likedBy = likedBy;
+	}
+	public Context getContext() {
+		return context;
+	}
+	public void setContext(Context context) {
+		this.context = context;
 	}
 	
 }
