@@ -208,19 +208,29 @@ public class UserService {
 			return null;
 		System.out.println("LENGTH: " + tweetRepository.getTweets().size());
 		//look through all tweets, find ones authored by this guy or the guys followed by this guy
-		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets())
+		/*List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets())
 				.stream()
 				.filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor()))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList());*/
+		
+		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets().stream().filter(tweet->tweet.getAuthor().getCredentials().getUsername().equals(username) || getRealFollowing(username).contains(tweet.getAuthor())).collect(Collectors.toList()));
 		list.sort(null);
 		return list;
+	}
+
+	private List<Uzer> getRealFollowing(String username) {
+		// TODO Auto-generated method stub
+		if(!this.userExistsAndIsActive(username))
+			return null;
+		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
+		return user.getFollowers();
 	}
 
 	public List<TweetDto> getTweetsBy(String username) 
 	{
 		if(!this.userExistsAndIsActive(username))
 			return null;
-		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets()).stream().filter(tweetDto->tweetDto.getAuthor().getUsername().equals(username)).collect(Collectors.toList());
+		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets().stream().filter(tweet->tweet.getAuthor().getCredentials().getUsername().equals(username)).collect(Collectors.toList()));
 		list.sort(null);
 		return list;
 	}

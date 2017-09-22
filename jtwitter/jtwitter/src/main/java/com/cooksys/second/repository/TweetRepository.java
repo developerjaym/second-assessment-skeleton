@@ -60,6 +60,8 @@ public class TweetRepository {
 		context.setTarget(tweet.getId());//.setTweetId(tweet.getId());
 		entityManager.persist(context);
 		
+		tweet.setContextId(context.getId());
+		
 		return tweet;
 	}
 
@@ -71,6 +73,10 @@ public class TweetRepository {
 		//original.getContext().getAfter().add(reply.getId());//add it to the original's context
 		Context originalContext = this.get(original.getContextId());
 		Integer[] after = new Integer[originalContext.getAfter().length+1];
+		for(int i = 0; i < after.length-1; i++)
+		{
+			after[i] = originalContext.getAfter()[i];
+		}
 		after[after.length-1] = reply.getId();
 		originalContext.setAfter(after);
 		
@@ -138,6 +144,20 @@ public class TweetRepository {
 	public void deactivateTweetsBy(Uzer author) {
 		List<Tweet> list = entityManager.createQuery("FROM Tweet", Tweet.class).getResultList().stream().filter(tweet->tweet.getAuthor().equals(author)).collect(Collectors.toList());
 		list.forEach(tweet->tweet.setActive(false));
+		
+	}
+
+	@Transactional
+	public void likeTweet(Tweet tweet, Integer id) {
+		if(tweet.getLikedBy() == null)
+			tweet.setLikedBy(new Integer[0]);
+		Integer[] likers = new Integer[tweet.getLikedBy().length+1];
+		for(int i = 0; i < likers.length-1; i++)
+		{
+			likers[i] = tweet.getLikedBy()[i];
+		}
+		likers[likers.length-1] = id;
+		tweet.setLikedBy(likers);
 		
 	}
 

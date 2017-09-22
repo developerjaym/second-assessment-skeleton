@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import com.cooksys.second.dto.TweetDto;
+import com.cooksys.second.dto.UserDto;
 import com.cooksys.second.entity.Credentials;
 import com.cooksys.second.entity.Profile;
 import com.cooksys.second.entity.Uzer;
@@ -82,5 +83,9 @@ public class UserRepository {
 	public void reactivate(Uzer uzer) {
 		uzer.setActive(true);
 		
+	}
+
+	public Uzer getUser(Integer i) {
+		return entityManager.find(Uzer.class, i);
 	}
 }

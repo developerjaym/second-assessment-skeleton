@@ -22,8 +22,10 @@ import com.cooksys.second.entity.Uzer;
 import com.cooksys.second.mapper.ContextMapper;
 import com.cooksys.second.mapper.TagMapper;
 import com.cooksys.second.mapper.TweetMapper;
+import com.cooksys.second.mapper.UserMapper;
 import com.cooksys.second.repository.TweetJpaRepository;
 import com.cooksys.second.repository.TweetRepository;
+import com.cooksys.second.repository.UserRepository;
 import com.cooksys.second.repository.UzerJpaRepository;
 import com.cooksys.second.utility.Parser;
 import com.cooksys.second.utility.TimeStamper;
@@ -39,9 +41,10 @@ public class TweetService {
 	private TweetJpaRepository tweetJpaRepository;
 	private UserService userService;
 	private ContextMapper contextMapper;
+	private UserRepository userRepository;
+	private UserMapper userMapper;
 	
-	
-	public TweetService(ContextMapper contextMapper, UserService userService, TagMapper tagMapper, TweetJpaRepository tweetJpaRepository, UzerJpaRepository uzerJpaRepository, TweetRepository tweetRepository, TweetMapper tweetMapper)
+	public TweetService(UserMapper userMapper, UserRepository userRepository, ContextMapper contextMapper, UserService userService, TagMapper tagMapper, TweetJpaRepository tweetJpaRepository, UzerJpaRepository uzerJpaRepository, TweetRepository tweetRepository, TweetMapper tweetMapper)
 	{
 		this.tweetRepository = tweetRepository;
 		this.tweetMapper = tweetMapper;
@@ -50,6 +53,8 @@ public class TweetService {
 		this.tweetJpaRepository = tweetJpaRepository;
 		this.userService = userService;
 		this.contextMapper = contextMapper;
+		this.userRepository = userRepository;
+		this.userMapper = userMapper;
 	}
 	
 	public List<TweetDto> getTweets() {
@@ -115,10 +120,13 @@ public class TweetService {
 	public boolean likeTweet(Integer id, CredentialsDto credentialsDto) {
 		if(!credentialsMatch(credentialsDto))
 			return false;
+		if(this.getTweet(id) == null)
+			return false;
 		Tweet tweet = tweetJpaRepository.findById(id);
-		ArrayList<Integer> list = (ArrayList<Integer>) Arrays.asList(tweet.getLikedBy());
-		list.add(uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()).getId());
-		tweet.setLikedBy(list.toArray(tweet.getLikedBy()));
+		tweetRepository.likeTweet(tweet, this.uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()).getId());
+		//List<Integer> list = Arrays.asList(tweet.getLikedBy());
+		//list.add(uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()).getId());
+		//tweet.setLikedBy(list.toArray(tweet.getLikedBy()));
 		return true;
 	}
 
@@ -143,14 +151,20 @@ public class TweetService {
 	public Set<UserDto> getLikes(Integer id) {
 		if(!isTweetActiveAndExisting(id))
 			return null;
-		
+		System.out.println("ID : " + id + " apparently exists");
 		//go through each saved ID in the Tweet's likedBy array, find the corresponding uzer, set 'em up and return
 		Integer[] likerIds =  tweetJpaRepository.findById(id).getLikedBy();
+		System.out.println("tweet: " + tweetJpaRepository.findById(id).getLikedBy().length);
 		Set<UserDto> likers = new HashSet<UserDto>();
 		for(Integer i : likerIds)
 		{
-			likers.add(uzerJpaRepository.findById(i));
+			System.out.println("first liker: " + i);
+			System.out.println("he is : " + uzerJpaRepository.findById(i));
+			Uzer uzer = userRepository.getUser(i);
+			likers.add(userMapper.toDto(uzer));
+			//likers.add(userRepository.//uzerJpaRepository.findById(i));
 		}
+		System.out.println(likers);
 		return likers;
 	}
 
@@ -160,8 +174,11 @@ public class TweetService {
 		//find ones that inReplyToId matches the given id
 		if(!isTweetActiveAndExisting(id))
 			return null;
-		
-		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getInReplyTo().equals(id)).collect(Collectors.toList());
+		List<TweetDto> list = tweetMapper.toDtos(this.getRealTweets().stream().filter(tweet->tweet.getInReplyToId()!=null && tweet.getInReplyToId().equals(id)).collect(Collectors.toList()));
+		/*List<TweetDto> list = getTweets()
+				.stream()
+				.filter(tweetDto->tweetDto.getInReplyTo()!=null && tweetDto.getInReplyTo().equals(id))
+				.collect(Collectors.toList());*/
 		
 		return list;
 	}
@@ -177,10 +194,10 @@ public class TweetService {
 	public List<UserDto> getMentions(Integer id) {
 		if(!isTweetActiveAndExisting(id))
 			return null;
-				
+			
 		TweetDto tweetDto = this.getTweet(id);
 		List<String> mentionedNames =  Parser.getNames(tweetDto.getContent());
-		return userService.getUsers().stream().filter(userDto->mentionedNames.contains(userDto.getUsername())).collect(Collectors.toList());
+		return userMapper.toDtos(userService.getUzers().stream().filter(uzer->mentionedNames.contains(uzer.getCredentials().getUsername())).collect(Collectors.toList()));
 		 
 	}
 

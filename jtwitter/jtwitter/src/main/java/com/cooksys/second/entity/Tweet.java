@@ -9,8 +9,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+import com.cooksys.second.dto.TweetDto;
+
 @Entity
-public class Tweet {
+public class Tweet implements Comparable<Tweet>
+{
 	@Id
 	@GeneratedValue
 	private Integer id;
@@ -121,6 +124,9 @@ public class Tweet {
 	public void setContextId(Integer contextId) {
 		this.contextId = contextId;
 	}
-	
+	@Override
+	public int compareTo(Tweet o) {
+		return posted.compareTo(o.posted);//might be backwards
+	}
 }
 
