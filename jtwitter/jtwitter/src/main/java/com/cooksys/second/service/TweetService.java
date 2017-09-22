@@ -20,6 +20,7 @@ import com.cooksys.second.entity.Hashtag;
 import com.cooksys.second.entity.Tweet;
 import com.cooksys.second.entity.Uzer;
 import com.cooksys.second.mapper.ContextMapper;
+import com.cooksys.second.mapper.JaysMapper;
 import com.cooksys.second.mapper.TagMapper;
 import com.cooksys.second.mapper.TweetMapper;
 import com.cooksys.second.mapper.UserMapper;
@@ -42,7 +43,7 @@ public class TweetService {
 	private UserService userService;
 	private ContextMapper contextMapper;
 	private UserRepository userRepository;
-	private UserMapper userMapper;
+	//private UserMapper userMapper;
 	
 	public TweetService(UserMapper userMapper, UserRepository userRepository, ContextMapper contextMapper, UserService userService, TagMapper tagMapper, TweetJpaRepository tweetJpaRepository, UzerJpaRepository uzerJpaRepository, TweetRepository tweetRepository, TweetMapper tweetMapper)
 	{
@@ -54,7 +55,7 @@ public class TweetService {
 		this.userService = userService;
 		this.contextMapper = contextMapper;
 		this.userRepository = userRepository;
-		this.userMapper = userMapper;
+		//this.userMapper = userMapper;
 	}
 	
 	public List<TweetDto> getTweets() {
@@ -83,7 +84,7 @@ public class TweetService {
 		tweet.setType(TweetTypes.SIMPLE.toString());
 		
 		//I should parse it for hashtags and then make new hashtags
-		List<Hashtag> hashtags = Parser.getHashtags(postTweetDto.getContent());
+		List<String> hashtags = Parser.getHashtags(postTweetDto.getContent());
 		tweetRepository.createHashtags(hashtags);
 		
 		return tweetMapper.toDto(tweetRepository.createTweet(tweet));
@@ -124,9 +125,6 @@ public class TweetService {
 			return false;
 		Tweet tweet = tweetJpaRepository.findById(id);
 		tweetRepository.likeTweet(tweet, this.uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()).getId());
-		//List<Integer> list = Arrays.asList(tweet.getLikedBy());
-		//list.add(uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername()).getId());
-		//tweet.setLikedBy(list.toArray(tweet.getLikedBy()));
 		return true;
 	}
 
@@ -151,20 +149,14 @@ public class TweetService {
 	public Set<UserDto> getLikes(Integer id) {
 		if(!isTweetActiveAndExisting(id))
 			return null;
-		System.out.println("ID : " + id + " apparently exists");
 		//go through each saved ID in the Tweet's likedBy array, find the corresponding uzer, set 'em up and return
 		Integer[] likerIds =  tweetJpaRepository.findById(id).getLikedBy();
-		System.out.println("tweet: " + tweetJpaRepository.findById(id).getLikedBy().length);
 		Set<UserDto> likers = new HashSet<UserDto>();
 		for(Integer i : likerIds)
 		{
-			System.out.println("first liker: " + i);
-			System.out.println("he is : " + uzerJpaRepository.findById(i));
 			Uzer uzer = userRepository.getUser(i);
-			likers.add(userMapper.toDto(uzer));
-			//likers.add(userRepository.//uzerJpaRepository.findById(i));
+			likers.add(JaysMapper.toDto(uzer));
 		}
-		System.out.println(likers);
 		return likers;
 	}
 
@@ -175,18 +167,14 @@ public class TweetService {
 		if(!isTweetActiveAndExisting(id))
 			return null;
 		List<TweetDto> list = tweetMapper.toDtos(this.getRealTweets().stream().filter(tweet->tweet.getInReplyToId()!=null && tweet.getInReplyToId().equals(id)).collect(Collectors.toList()));
-		/*List<TweetDto> list = getTweets()
-				.stream()
-				.filter(tweetDto->tweetDto.getInReplyTo()!=null && tweetDto.getInReplyTo().equals(id))
-				.collect(Collectors.toList());*/
-		
 		return list;
 	}
 
 	public List<TweetDto> getReposts(Integer id) {
 		if(!isTweetActiveAndExisting(id))
 			return null;
-		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getRepostOf().equals(id)).collect(Collectors.toList());
+		List<TweetDto> list = tweetMapper.toDtos(this.getRealTweets().stream().filter(tweet->tweet.getRepostOfId()!=null && tweet.getRepostOfId().equals(id)).collect(Collectors.toList()));
+		
 		
 		return list;
 	}
@@ -197,7 +185,7 @@ public class TweetService {
 			
 		TweetDto tweetDto = this.getTweet(id);
 		List<String> mentionedNames =  Parser.getNames(tweetDto.getContent());
-		return userMapper.toDtos(userService.getUzers().stream().filter(uzer->mentionedNames.contains(uzer.getCredentials().getUsername())).collect(Collectors.toList()));
+		return JaysMapper.toDtos(userService.getUzers().stream().filter(uzer->mentionedNames.contains(uzer.getCredentials().getUsername())).collect(Collectors.toList()));
 		 
 	}
 
@@ -206,7 +194,9 @@ public class TweetService {
 			return null;
 		
 		Tweet tweet = tweetJpaRepository.findById(id);
-		//ContextDto contextDto = contextMapper.toDto(tweet.getContext());
+		if(tweet.getContextId() == null)
+			return null;//I think this only happened in my database due to a mistake made in populating the database earlier
+		
 		ContextDto contextDto = contextMapper.toDto(tweetRepository.get(tweet.getContextId()));
 		//now remove all deleted tweets
 		

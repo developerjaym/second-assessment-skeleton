@@ -28,16 +28,9 @@ public class UserRepository {
 	{
 		return entityManager.createQuery("FROM Uzer", Uzer.class).getResultList();
 	}
-
-	/*public Uzer get(String username)
-	{
-		return entityManager.find(Uzer.class, username);
-	}*/
 	
 	@Transactional
 	public Uzer create(Uzer uzer) {
-		// TODO Auto-generated method stub
-		System.out.println("My new user is: " + uzer);
 		entityManager.persist(uzer);
 		return uzer;//should have an ID now, right?
 		

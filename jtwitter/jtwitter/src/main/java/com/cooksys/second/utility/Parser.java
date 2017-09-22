@@ -79,8 +79,8 @@ public class Parser {
 	 * @param content
 	 * @return
 	 */
-	public static List<Hashtag> getHashtags(String content) {
-		ArrayList<Hashtag> list = new ArrayList<>();
+	public static List<String> getHashtags(String content) {
+		ArrayList<String> list = new ArrayList<>();
 		content = content.replace(',', ' ');
 		content = content.replace('.', ' ');
 		content = content.replace('@', ' ');
@@ -97,7 +97,7 @@ public class Parser {
 			tag.setLastUsed(TimeStamper.getTimestamp());
 			//tag.setFirstUsed???
 			if(tag.getLabel().length()>0)
-				list.add(tag);
+				list.add(tag.getLabel());
 			content = content.substring(spaceIndex);
 			
 		}

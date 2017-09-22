@@ -70,7 +70,6 @@ public class TweetRepository {
 		entityManager.persist(reply);
 		entityManager.flush();//so I get an id. Does this work?
 		
-		//original.getContext().getAfter().add(reply.getId());//add it to the original's context
 		Context originalContext = this.get(original.getContextId());
 		Integer[] after = new Integer[originalContext.getAfter().length+1];
 		for(int i = 0; i < after.length-1; i++)
@@ -87,6 +86,8 @@ public class TweetRepository {
 		context.getBefore()[0] = original.getId();
 		context.setTarget(reply.getId());//.setTweetId(tweet.getId());
 		entityManager.persist(context);
+		
+		reply.setContextId(context.getId());
 		
 		return reply;
 	}
@@ -114,23 +115,27 @@ public class TweetRepository {
 	}
 	
 	@Transactional
-	public void createHashtags(List<Hashtag> hashtags) {
+	public void createHashtags(List<String> hashtags) {
 		//go through each hashtag
 		//if it is already in the db, udpate the lastUsed column
 		//else, add it to the db and set the firstUsed and lastUsed
 		List<Hashtag> existingHashtags = getAllHashtags();
-		hashtags.forEach((Hashtag hashtag)->{
-			if(existingHashtags.contains(hashtag))
+		existingHashtags.forEach((hashtag)->{
+			if(hashtags.contains(hashtag.getLabel()))
 			{
 				hashtag.setLastUsed(TimeStamper.getTimestamp());
-			}
-			else
-			{
-				hashtag.setFirstUsed(TimeStamper.getTimestamp());
-				hashtag.setLastUsed(hashtag.getFirstUsed());
-				entityManager.persist(hashtag);
+				hashtags.remove(hashtag.getLabel());
 			}
 			
+		});
+		
+		hashtags.forEach(string->{
+			Hashtag tag = new Hashtag();
+			tag.setLabel(string);
+			tag.setFirstUsed(TimeStamper.getTimestamp());
+			tag.setLastUsed(tag.getFirstUsed());
+			entityManager.persist(tag);
+			entityManager.flush();//to avoid possible id problems
 		});
 		
 	}

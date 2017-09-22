@@ -115,7 +115,6 @@ public class TweetController {
 	public List<TweetDto> getReplies(@PathVariable Integer id, HttpServletResponse response)
 	{
 		List<TweetDto> list = tweetService.getReplies(id);
-		System.out.println("LIST : " + list);
 		if(list == null)
 			response.setStatus(404);
 		else if(list.isEmpty())

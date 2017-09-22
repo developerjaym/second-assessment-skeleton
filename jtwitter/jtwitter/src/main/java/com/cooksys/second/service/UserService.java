@@ -15,6 +15,7 @@ import com.cooksys.second.mapper.NewUserMapper;
 import com.cooksys.second.mapper.ProfileMapper;
 import com.cooksys.second.mapper.TweetMapper;
 import com.cooksys.second.mapper.UserMapper;
+import com.cooksys.second.mapper.JaysMapper;
 import com.cooksys.second.repository.CredentialsRepository;
 import com.cooksys.second.repository.TweetRepository;
 import com.cooksys.second.repository.UserRepository;
@@ -28,22 +29,22 @@ public class UserService {
 
 	private UserRepository userRepository;
 	private UzerJpaRepository uzerJpaRepository;
-	private UserMapper userMapper;
+	//private JaysMapper JaysMapper;
 	private NewUserMapper newUserMapper;
 	private CredentialsMapper credentialsMapper;
 	//mappers
 	//other repositories
 	private ProfileMapper profileMapper;
-	
-	//private TweetService tweetService;
 	private ValidationService validationService;
 	private CredentialsRepository credentialsRepository;
 	private TweetRepository tweetRepository;
 	private TweetMapper tweetMapper;
+	
+	
 	public UserService(TweetMapper tweetMapper, TweetRepository tweetRepository, ValidationService validationService, /*TweetService tweetService*/CredentialsRepository credentialsRepository, UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
 	{
 		this.userRepository = userRepository;
-		this.userMapper = userMapper;
+		//this.JaysMapper = JaysMapper;
 		this.newUserMapper = newUserMapper;
 		this.credentialsMapper = credentialsMapper;
 		this.uzerJpaRepository = uzerJpaRepository;
@@ -56,7 +57,7 @@ public class UserService {
 	}
 	
 	public List<UserDto> getUsers() {
-		return userMapper.toDtos(userRepository.getAllUsers().stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
+		return JaysMapper.toDtos(userRepository.getAllUsers().stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
 		//return null;
 	}
 
@@ -66,7 +67,7 @@ public class UserService {
 	}
 	
 	public List<UserDto> getEvenDeletedUsers() {
-		return userMapper.toDtos(userRepository.getAllUsers());//.stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
+		return JaysMapper.toDtos(userRepository.getAllUsers());//.stream().filter(userdto->userdto.isActive()).collect(Collectors.toList()));
 		//return null;
 	}
 	public boolean userExistsAndIsActive(String username)
@@ -93,7 +94,7 @@ public class UserService {
 	{
 		if(!userExistsAndIsActive(username))
 			return null;
-		return userMapper.toDto(uzerJpaRepository.findByCredentialsUsername(username));
+		return JaysMapper.toDto(uzerJpaRepository.findByCredentialsUsername(username));
 	}
 	
 	public UserDto createUser(NewUserDto newUserDto) {
@@ -109,7 +110,7 @@ public class UserService {
 			//tweetService.reactivateTweetsBy(uzer);
 			tweetRepository.reactivateTweetsBy(uzer);
 			//should I update the profile?
-			return userMapper.toDto(uzer);
+			return JaysMapper.toDto(uzer);
 		}
 		else if(validationService.isUsernameAvailable(newUserDto.getCredentials().getUsername()))
 		{
@@ -127,10 +128,10 @@ public class UserService {
 			uzer = userRepository.create(uzer);
 			
 			
-			UserDto userDto = userMapper.toDto(uzer);
+			UserDto userDto = JaysMapper.toDto(uzer);
 			userDto.setUsername(uzer.getCredentials().getUsername());//should be handled automatically
 			
-			return userDto;//userMapper.toDto(uzer);
+			return userDto;//JaysMapper.toDto(uzer);
 		}
 		else
 			return null;//name taken, I guess
@@ -144,7 +145,7 @@ public class UserService {
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
 		//tweetService.getRealTweets().forEach(tweet->tweet.setActive(false));//deactivate all their tweets
 		tweetRepository.deactivateTweetsBy(user);
-		return userMapper.toDto(userRepository.delete(user));
+		return JaysMapper.toDto(userRepository.delete(user));
 	}
 
 	public UserDto updateUser(String username, NewUserDto newUserDto) {
@@ -152,7 +153,7 @@ public class UserService {
 			return null;
 		if(!credentialsMatch(newUserDto.getCredentials()))
 			return null;
-		return userMapper.toDto(
+		return JaysMapper.toDto(
 				userRepository.updateUser(
 						uzerJpaRepository.findByCredentialsUsername(username),
 						profileMapper.toProfile(
@@ -193,26 +194,19 @@ public class UserService {
 		if(!this.userExistsAndIsActive(username))
 			return null;
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
-		return userMapper.toDtos(user.getFollowedBy());
+		return JaysMapper.toDtos(user.getFollowedBy());
 	}
 
 	public List<UserDto> getFollowing(String username) {
 		if(!this.userExistsAndIsActive(username))
 			return null;
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
-		return userMapper.toDtos(user.getFollowers());
+		return JaysMapper.toDtos(user.getFollowers());
 	}
 
 	public List<TweetDto> getFeed(String username) {
 		if(!this.userExistsAndIsActive(username))
 			return null;
-		System.out.println("LENGTH: " + tweetRepository.getTweets().size());
-		//look through all tweets, find ones authored by this guy or the guys followed by this guy
-		/*List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets())
-				.stream()
-				.filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor()))
-				.collect(Collectors.toList());*/
-		
 		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets().stream().filter(tweet->tweet.getAuthor().getCredentials().getUsername().equals(username) || getRealFollowing(username).contains(tweet.getAuthor())).collect(Collectors.toList()));
 		list.sort(null);
 		return list;
