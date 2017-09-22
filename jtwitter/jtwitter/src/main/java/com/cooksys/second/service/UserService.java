@@ -100,9 +100,11 @@ public class UserService {
 		
 		if(credentialsMatch(newUserDto.getCredentials()))
 		{
+			System.out.println("REANIMATING");
 			//reactivate
 			Uzer uzer = uzerJpaRepository.findByCredentialsUsername(newUserDto.getCredentials().getUsername());
-			uzer.setActive(true);
+			//uzer.setActive(true);
+			userRepository.reactivate(uzer);//uzerJpaRepository.findByCredentialsUsername(newUserDto.getCredentials().getUsername()));
 			//reactive all tweets, too?
 			//tweetService.reactivateTweetsBy(uzer);
 			tweetRepository.reactivateTweetsBy(uzer);
@@ -182,7 +184,7 @@ public class UserService {
 		Uzer userWhoWillUnFollow = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
 		if(!userToBeUnFollowed.getFollowedBy().contains(userWhoWillUnFollow))
 			return false;//can't unfollow if not already following
-		
+		System.out.println("HERE HERE HERE");
 		userRepository.unfollowUser(userToBeUnFollowed, userWhoWillUnFollow);
 		return true;
 	}
@@ -204,9 +206,12 @@ public class UserService {
 	public List<TweetDto> getFeed(String username) {
 		if(!this.userExistsAndIsActive(username))
 			return null;
-		
+		System.out.println("LENGTH: " + tweetRepository.getTweets().size());
 		//look through all tweets, find ones authored by this guy or the guys followed by this guy
-		List<TweetDto> list = /* tweetService.getTweets()*/tweetMapper.toDtos(tweetRepository.getTweets()).stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
+		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets())
+				.stream()
+				.filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor()))
+				.collect(Collectors.toList());
 		list.sort(null);
 		return list;
 	}

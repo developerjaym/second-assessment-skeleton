@@ -249,7 +249,7 @@ public class TweetService {
 
 	public boolean credentialsMatch(CredentialsDto credentials) {
 		//go through all Uzers, if one with these credentials is active, return true
-		return userService.getUzers().stream().filter(uzer->uzer.getCredentials().getUsername()==credentials.getUsername() && uzer.getCredentials().getPassword()==credentials.getPassword()).collect(Collectors.toList()).size()==1;
+		return userService.getUzers().stream().filter(uzer->uzer.getCredentials().getUsername().equals(credentials.getUsername()) && uzer.getCredentials().getPassword().equals(credentials.getPassword())).collect(Collectors.toList()).size()==1;
 	}
 
 	public void reactivateTweetsBy(Uzer author) {

@@ -71,9 +71,16 @@ public class UserRepository {
 		follower.getFollowers().add(followed);//I should rename getFollowers()
 	}
 
+	@Transactional
 	public void unfollowUser(Uzer followed, Uzer follower) {
 		followed.getFollowedBy().remove(follower);
 		follower.getFollowers().remove(followed);//I should rename getFollowers()
+		
+	}
+	
+	@Transactional
+	public void reactivate(Uzer uzer) {
+		uzer.setActive(true);
 		
 	}
 }
