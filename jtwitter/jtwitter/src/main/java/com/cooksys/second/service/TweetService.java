@@ -161,7 +161,7 @@ public class TweetService {
 		if(!isTweetActiveAndExisting(id))
 			return null;
 		
-		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getInReplyTo().getId().equals(id)).collect(Collectors.toList());
+		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getInReplyTo().equals(id)).collect(Collectors.toList());
 		
 		return list;
 	}
@@ -169,7 +169,7 @@ public class TweetService {
 	public List<TweetDto> getReposts(Integer id) {
 		if(!isTweetActiveAndExisting(id))
 			return null;
-		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getRepostOf().getId().equals(id)).collect(Collectors.toList());
+		List<TweetDto> list = getTweets().stream().filter(tweetDto->tweetDto.getRepostOf().equals(id)).collect(Collectors.toList());
 		
 		return list;
 	}
@@ -189,11 +189,21 @@ public class TweetService {
 			return null;
 		
 		Tweet tweet = tweetJpaRepository.findById(id);
-		ContextDto contextDto = contextMapper.toDto(tweet.getContext());
+		//ContextDto contextDto = contextMapper.toDto(tweet.getContext());
+		ContextDto contextDto = contextMapper.toDto(tweetRepository.get(tweet.getContextId()));
 		//now remove all deleted tweets
-		contextDto.setAfter(contextDto.getAfter().stream().filter(tweetDto-> tweetJpaRepository.findById(id).getActive()).collect(Collectors.toList()));
-		contextDto.setBefore(contextDto.getBefore().stream().filter(tweetDto-> tweetJpaRepository.findById(id).getActive()).collect(Collectors.toList()));
-		contextDto.setTarget(getTweet(id));//just to be sure
+		
+		//do array stuff for now
+		ArrayList<Integer> after = new ArrayList<>();
+		for(Integer i : contextDto.getAfter())
+			after.add(i);
+		ArrayList<Integer> before = new ArrayList<>();
+		for(Integer i : contextDto.getBefore())
+			before.add(i);
+		
+		contextDto.setAfter(after.stream().filter(tweetDto-> tweetJpaRepository.findById(id).getActive()).collect(Collectors.toList()).toArray(contextDto.getAfter()));
+		contextDto.setBefore(before.stream().filter(tweetDto-> tweetJpaRepository.findById(id).getActive()).collect(Collectors.toList()).toArray(contextDto.getBefore()));
+		contextDto.setTarget(id);//getTweet(id));//just to be sure
 		
 		return contextDto;
 		

@@ -16,9 +16,9 @@ public class TweetDto implements Comparable<TweetDto>
 	
 	private String content;//optional
 	
-	private Tweet inReplyTo;//optional
+	private Integer inReplyTo;//optional
 	
-	private Tweet repostOf;//optional
+	private Integer repostOf;//optional
 
 	public Integer getId() {
 		return id;
@@ -52,19 +52,19 @@ public class TweetDto implements Comparable<TweetDto>
 		this.content = content;
 	}
 
-	public Tweet getInReplyTo() {
+	public Integer getInReplyTo() {
 		return inReplyTo;
 	}
 
-	public void setInReplyTo(Tweet inReplyTo) {
+	public void setInReplyTo(Integer inReplyTo) {
 		this.inReplyTo = inReplyTo;
 	}
 
-	public Tweet getRepostOf() {
+	public Integer getRepostOf() {
 		return repostOf;
 	}
 
-	public void setRepostOf(Tweet repostOf) {
+	public void setRepostOf(Integer repostOf) {
 		this.repostOf = repostOf;
 	}
 

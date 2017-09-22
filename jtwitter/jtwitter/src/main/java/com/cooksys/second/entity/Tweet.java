@@ -48,7 +48,9 @@ public class Tweet {
 	
 	private Integer[] likedBy;
 	
-	private Context context;
+	//@OneToOne
+	//private Context context;
+	private Integer contextId;
 	
 	public Integer getId() {
 		return id;
@@ -105,11 +107,19 @@ public class Tweet {
 	public void setLikedBy(Integer[] likedBy) {
 		this.likedBy = likedBy;
 	}
+	/*
 	public Context getContext() {
 		return context;
 	}
 	public void setContext(Context context) {
 		this.context = context;
+	}
+	*/
+	public Integer getContextId() {
+		return contextId;
+	}
+	public void setContextId(Integer contextId) {
+		this.contextId = contextId;
 	}
 	
 }

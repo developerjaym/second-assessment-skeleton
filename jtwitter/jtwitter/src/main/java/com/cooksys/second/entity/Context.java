@@ -19,16 +19,19 @@ public class Context {
 	
 	/*@Column(nullable = false)
 	private Integer tweetId;*/
-	@OneToOne
-	private Tweet target;
+	//@OneToOne
+	//private Tweet target;
+	private Integer target;
+	
+	//@OneToMany
+	//private List<Tweet> before;//check annotation
+	private Integer[] before;
+	
+	//@OneToMany
+	//private List<Tweet> after;//check annotation
+	private Integer[] after;
 	
 	
-	@OneToMany
-	private List<Tweet> before;//check annotation
-	
-	@OneToMany
-	private List<Tweet> after;//check annotation
-
 	public Integer getId() {
 		return id;
 	}
@@ -37,7 +40,31 @@ public class Context {
 		this.id = id;
 	}
 
+	public Integer getTarget() {
+		return target;
+	}
 
+	public void setTarget(Integer target) {
+		this.target = target;
+	}
+
+	public Integer[] getBefore() {
+		return before;
+	}
+
+	public void setBefore(Integer[] before) {
+		this.before = before;
+	}
+
+	public Integer[] getAfter() {
+		return after;
+	}
+
+	public void setAfter(Integer[] after) {
+		this.after = after;
+	}
+
+/*
 	public Tweet getTarget() {
 		return target;
 	}
@@ -61,6 +88,6 @@ public class Context {
 	public void setAfter(List<Tweet> after) {
 		this.after = after;
 	}
-	
+	*/
 	
 }

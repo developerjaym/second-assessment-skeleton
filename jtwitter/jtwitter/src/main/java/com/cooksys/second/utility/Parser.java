@@ -81,17 +81,25 @@ public class Parser {
 	 */
 	public static List<Hashtag> getHashtags(String content) {
 		ArrayList<Hashtag> list = new ArrayList<>();
+		content = content.replace(',', ' ');
+		content = content.replace('.', ' ');
+		content = content.replace('@', ' ');
+		content = content.replace('?', ' ');
+		content = content.replace('!', ' ');
+		content = content.replace("#", " #");
 		while(content.contains("#"))
 		{
-			content = content + " ";//add whitespace for convenien
+			content = content + " ";//add whitespace for convenience
 			int firstTag = content.indexOf("#");
 			int spaceIndex = content.indexOf(" ", firstTag);
 			Hashtag tag = new Hashtag();
-			tag.setLabel(content.substring(firstTag, spaceIndex));
+			tag.setLabel(content.substring(firstTag+1, spaceIndex));
 			tag.setLastUsed(TimeStamper.getTimestamp());
 			//tag.setFirstUsed???
-			list.add(tag);
+			if(tag.getLabel().length()>0)
+				list.add(tag);
 			content = content.substring(spaceIndex);
+			
 		}
 		return list;
 		
@@ -99,13 +107,20 @@ public class Parser {
 
 	public static List<String> getNames(String content) {
 		ArrayList<String> list = new ArrayList<>();
+		content = content.replace(',', ' ');
+		content = content.replace('.', ' ');
+		content = content.replace('#', ' ');
+		content = content.replace('?', ' ');
+		content = content.replace('!', ' ');
+		content = content.replace("@", " @");
 		while(content.contains("@"))
 		{
-			content = content + " ";//add whitespace for convenien
+			content = content + " ";//add whitespace for convenience
 			int firstTag = content.indexOf("@");
 			int spaceIndex = content.indexOf(" ", firstTag);
 			//tag.setFirstUsed???
-			list.add(content.substring(firstTag, spaceIndex));
+			if((firstTag+1)-spaceIndex != 0)
+				list.add(content.substring(firstTag+1, spaceIndex));
 			content = content.substring(spaceIndex);
 		}
 		return list;

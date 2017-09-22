@@ -3,11 +3,13 @@ package com.cooksys.second.entity;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import com.cooksys.second.utility.TimeStamper;
 
+@Entity
 public class Hashtag {
 	
 	@Id

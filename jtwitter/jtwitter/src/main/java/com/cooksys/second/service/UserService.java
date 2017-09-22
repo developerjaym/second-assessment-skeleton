@@ -13,7 +13,10 @@ import com.cooksys.second.entity.Uzer;
 import com.cooksys.second.mapper.CredentialsMapper;
 import com.cooksys.second.mapper.NewUserMapper;
 import com.cooksys.second.mapper.ProfileMapper;
+import com.cooksys.second.mapper.TweetMapper;
 import com.cooksys.second.mapper.UserMapper;
+import com.cooksys.second.repository.CredentialsRepository;
+import com.cooksys.second.repository.TweetRepository;
 import com.cooksys.second.repository.UserRepository;
 import com.cooksys.second.repository.UzerJpaRepository;
 import com.cooksys.second.utility.Parser;
@@ -32,18 +35,24 @@ public class UserService {
 	//other repositories
 	private ProfileMapper profileMapper;
 	
-	private TweetService tweetService;
+	//private TweetService tweetService;
 	private ValidationService validationService;
-	
-	public UserService(ValidationService validationService, TweetService tweetService, UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
+	private CredentialsRepository credentialsRepository;
+	private TweetRepository tweetRepository;
+	private TweetMapper tweetMapper;
+	public UserService(TweetMapper tweetMapper, TweetRepository tweetRepository, ValidationService validationService, /*TweetService tweetService*/CredentialsRepository credentialsRepository, UzerJpaRepository uzerJpaRepository, UserRepository userRepository, UserMapper userMapper, NewUserMapper newUserMapper, CredentialsMapper credentialsMapper, ProfileMapper profileMapper)
 	{
 		this.userRepository = userRepository;
 		this.userMapper = userMapper;
 		this.newUserMapper = newUserMapper;
 		this.credentialsMapper = credentialsMapper;
 		this.uzerJpaRepository = uzerJpaRepository;
-		this.tweetService = tweetService;
+		//this.tweetService = tweetService;
+		this.credentialsRepository = credentialsRepository;
 		this.validationService = validationService;
+		this.tweetRepository = tweetRepository;
+		this.tweetMapper = tweetMapper;
+		this.profileMapper = profileMapper;
 	}
 	
 	public List<UserDto> getUsers() {
@@ -62,7 +71,23 @@ public class UserService {
 	}
 	public boolean userExistsAndIsActive(String username)
 	{
-		return getUsers().stream().filter(userDto->userDto.getUsername().equals(username)).collect(Collectors.toList()).size() == 1;
+		/*List<UserDto> list = getUsers()
+				.stream()
+				.filter(userDto->
+					userDto.getUsername().equals(username)
+				)
+				.collect(Collectors.toList());*/
+		List<Uzer> list = userRepository.getAllUsers()
+				.stream()
+				.filter(uzer->
+					uzer.getCredentials().getUsername().equals(username) && uzer.isActive()
+				)
+				.collect(Collectors.toList());
+		if(list == null)
+			return false;
+		if(list.isEmpty())
+			return false;
+		return true;
 	}
 	public UserDto getUser(String username)
 	{
@@ -73,13 +98,14 @@ public class UserService {
 	
 	public UserDto createUser(NewUserDto newUserDto) {
 		
-		if(tweetService.credentialsMatch(newUserDto.getCredentials()))
+		if(credentialsMatch(newUserDto.getCredentials()))
 		{
 			//reactivate
 			Uzer uzer = uzerJpaRepository.findByCredentialsUsername(newUserDto.getCredentials().getUsername());
 			uzer.setActive(true);
 			//reactive all tweets, too?
-			tweetService.reactivateTweetsBy(uzer);
+			//tweetService.reactivateTweetsBy(uzer);
+			tweetRepository.reactivateTweetsBy(uzer);
 			//should I update the profile?
 			return userMapper.toDto(uzer);
 		}
@@ -109,21 +135,26 @@ public class UserService {
 	}
 
 	public UserDto deleteUser(String username, CredentialsDto credentialsDto) {
-		if(!tweetService.credentialsMatch(credentialsDto))
+		if(!credentialsMatch(credentialsDto))
 			return null;
 		if(!this.userExistsAndIsActive(username))
 			return null;
 		Uzer user = uzerJpaRepository.findByCredentialsUsername(username);
-		tweetService.getRealTweets().forEach(tweet->tweet.setActive(false));//deactivate all their tweets
+		//tweetService.getRealTweets().forEach(tweet->tweet.setActive(false));//deactivate all their tweets
+		tweetRepository.deactivateTweetsBy(user);
 		return userMapper.toDto(userRepository.delete(user));
 	}
 
 	public UserDto updateUser(String username, NewUserDto newUserDto) {
 		if(!userExistsAndIsActive(username))
 			return null;
-		if(!tweetService.credentialsMatch(newUserDto.getCredentials()))
+		if(!credentialsMatch(newUserDto.getCredentials()))
 			return null;
-		return userMapper.toDto(userRepository.updateUser(uzerJpaRepository.findByCredentialsUsername(username), profileMapper.toProfile(newUserDto.getProfile())));
+		return userMapper.toDto(
+				userRepository.updateUser(
+						uzerJpaRepository.findByCredentialsUsername(username),
+						profileMapper.toProfile(
+								newUserDto.getProfile())));
 		
 	}
 
@@ -131,7 +162,7 @@ public class UserService {
 		
 		if(!userExistsAndIsActive(username))
 			return false;
-		if(!tweetService.credentialsMatch(credentialsDto))
+		if(!credentialsMatch(credentialsDto))
 			return false;
 		Uzer userToBeFollowed = uzerJpaRepository.findByCredentialsUsername(username);
 		Uzer userWhoWillFollow = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
@@ -145,7 +176,7 @@ public class UserService {
 	public boolean unfollowUser(String username, CredentialsDto credentialsDto) {
 		if(!userExistsAndIsActive(username))
 			return false;
-		if(!tweetService.credentialsMatch(credentialsDto))
+		if(!credentialsMatch(credentialsDto))
 			return false;
 		Uzer userToBeUnFollowed = uzerJpaRepository.findByCredentialsUsername(username);
 		Uzer userWhoWillUnFollow = uzerJpaRepository.findByCredentialsUsername(credentialsDto.getUsername());
@@ -175,7 +206,7 @@ public class UserService {
 			return null;
 		
 		//look through all tweets, find ones authored by this guy or the guys followed by this guy
-		List<TweetDto> list =  tweetService.getTweets().stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
+		List<TweetDto> list = /* tweetService.getTweets()*/tweetMapper.toDtos(tweetRepository.getTweets()).stream().filter(tweetDto-> tweetDto.getAuthor().getUsername().equals(username) || getFollowing(username).contains(tweetDto.getAuthor())).collect(Collectors.toList());
 		list.sort(null);
 		return list;
 	}
@@ -184,7 +215,7 @@ public class UserService {
 	{
 		if(!this.userExistsAndIsActive(username))
 			return null;
-		List<TweetDto> list = tweetService.getTweets().stream().filter(tweetDto->tweetDto.getAuthor().getUsername().equals(username)).collect(Collectors.toList());
+		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets()).stream().filter(tweetDto->tweetDto.getAuthor().getUsername().equals(username)).collect(Collectors.toList());
 		list.sort(null);
 		return list;
 	}
@@ -193,9 +224,12 @@ public class UserService {
 		if(!this.userExistsAndIsActive(username))
 			return null;
 		
-		List<TweetDto> list = tweetService.getTweets().stream().filter(tweetDto->Parser.mentionsName(username, tweetDto.getContent())).collect(Collectors.toList());
+		List<TweetDto> list = tweetMapper.toDtos(tweetRepository.getTweets()).stream().filter(tweetDto->Parser.mentionsName(username, tweetDto.getContent())).collect(Collectors.toList());
 		list.sort(null);
 		return list;
 	}
-
+	public boolean credentialsMatch(CredentialsDto credentials)
+	{
+		return credentialsRepository.credentialsMatch(credentials, userRepository.getAllUsers());
+	}
 }

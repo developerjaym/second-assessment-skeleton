@@ -28,10 +28,10 @@ public class UserRepository {
 		return entityManager.createQuery("FROM Uzer", Uzer.class).getResultList();
 	}
 
-	public Uzer get(String username)
+	/*public Uzer get(String username)
 	{
 		return entityManager.find(Uzer.class, username);
-	}
+	}*/
 	
 	@Transactional
 	public Uzer create(Uzer uzer) {

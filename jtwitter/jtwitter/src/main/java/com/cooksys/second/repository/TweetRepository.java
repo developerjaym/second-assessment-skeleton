@@ -34,7 +34,18 @@ public class TweetRepository {
 		
 		
 	}
+	
+	public List<Context> GetContexts() 
+	{
+		return entityManager.createQuery("FROM Context", Context.class).getResultList();
+	}
+	
+	public Context get(Integer contextId) {
 
+		return entityManager.find(Context.class, contextId);
+
+	}
+	
 	@Transactional
 	public Tweet createTweet(Tweet tweet) {
 		
@@ -44,9 +55,9 @@ public class TweetRepository {
 		entityManager.flush();//so I get an id. Does this work?
 		
 		Context context = new Context();
-		context.setAfter(new ArrayList<Tweet>());
-		context.setBefore(new ArrayList<Tweet>());
-		context.setTarget(tweet);//.setTweetId(tweet.getId());
+		context.setAfter(new Integer[1]);
+		context.setBefore(new Integer[1]);
+		context.setTarget(tweet.getId());//.setTweetId(tweet.getId());
 		entityManager.persist(context);
 		
 		return tweet;
@@ -57,13 +68,18 @@ public class TweetRepository {
 		entityManager.persist(reply);
 		entityManager.flush();//so I get an id. Does this work?
 		
-		original.getContext().getAfter().add(reply);//add it to the original's context
+		//original.getContext().getAfter().add(reply.getId());//add it to the original's context
+		Context originalContext = this.get(original.getContextId());
+		Integer[] after = new Integer[originalContext.getAfter().length+1];
+		after[after.length-1] = reply.getId();
+		originalContext.setAfter(after);
 		
 		Context context = new Context();//make a new context //if you have free time, do this more intelligently
-		context.setAfter(new ArrayList<Tweet>());
-		context.setBefore(new ArrayList<Tweet>());
-		context.getBefore().add(original);
-		context.setTarget(reply);//.setTweetId(tweet.getId());
+		context.setAfter(new Integer[0]);
+		context.setBefore(new Integer[1]);
+		//context.getBefore().add(original.getId());
+		context.getBefore()[0] = original.getId();
+		context.setTarget(reply.getId());//.setTweetId(tweet.getId());
 		entityManager.persist(context);
 		
 		return reply;
@@ -116,6 +132,12 @@ public class TweetRepository {
 	public void reactivateTweetsBy(Uzer author) {
 		List<Tweet> list = entityManager.createQuery("FROM Tweet", Tweet.class).getResultList().stream().filter(tweet->tweet.getAuthor().equals(author)).collect(Collectors.toList());
 		list.forEach(tweet->tweet.setActive(true));
+		
+	}
+
+	public void deactivateTweetsBy(Uzer author) {
+		List<Tweet> list = entityManager.createQuery("FROM Tweet", Tweet.class).getResultList().stream().filter(tweet->tweet.getAuthor().equals(author)).collect(Collectors.toList());
+		list.forEach(tweet->tweet.setActive(false));
 		
 	}
 

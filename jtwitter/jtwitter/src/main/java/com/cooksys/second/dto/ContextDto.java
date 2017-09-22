@@ -5,15 +5,36 @@ import java.util.List;
 
 public class ContextDto {
 	
-	private TweetDto target;
-	private List<TweetDto> before;
-	private List<TweetDto> after;
+	private Integer target;
+	private Integer[] before;
+	private Integer[] after;
+	public Integer getTarget() {
+		return target;
+	}
+	public void setTarget(Integer target) {
+		this.target = target;
+	}
+	public Integer[] getBefore() {
+		return before;
+	}
+	public void setBefore(Integer[] before) {
+		this.before = before;
+	}
+	public Integer[] getAfter() {
+		return after;
+	}
+	public void setAfter(Integer[] after) {
+		this.after = after;
+	}
+	
+	/*
 	public TweetDto getTarget() {
 		return target;
 	}
 	public void setTarget(TweetDto target) {
 		this.target = target;
 	}
+	
 	public List<TweetDto> getBefore() {
 		return before;
 	}
@@ -26,6 +47,6 @@ public class ContextDto {
 	public void setAfter(List<TweetDto> after) {
 		this.after = after;
 	}
-	
+	*/
 	
 }
